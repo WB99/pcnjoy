@@ -8,13 +8,9 @@ export default function Login(){
       <h1>WELCOME TO PCNJOY FUCKHEAD</h1>
       <h2>LOG THE FUCK IN BITCH</h2>
 
-      <a
-  onClick={() => {
-    window.location.href = '/main';
-  }}
->
-  Go to Main
-</a>
+      <a onClick={() => { window.location.href = '/main'; }}>
+        Go to Main
+      </a>
     </div>
 
     

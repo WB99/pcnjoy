@@ -5,13 +5,9 @@ export default function Main() {
     <div>
       <h1>MAP GOES HERE FUCK YOU</h1>
 
-      <a
-  onClick={() => {
-    window.location.href = '/Login';
-  }}
->
-  Go to Login
-</a>
+      <a onClick={() => { window.location.href = '/Login'; }}>
+        Go to Login
+      </a>
     </div>
   )
 }
