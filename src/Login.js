@@ -1,8 +1,6 @@
 import React from 'react';
-import {Routes, Route, Link, BrowserRouter as Router} from "react-router-dom";
-import Main from "./Main"
 
-export default function Login(){
+function Login(){
   return(
     <div>
       <h1>WELCOME TO PCNJOY FUCKHEAD</h1>
@@ -12,7 +10,7 @@ export default function Login(){
         Go to Main
       </a>
     </div>
-
-    
   )
 }
+
+export default Login;

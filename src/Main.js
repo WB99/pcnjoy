@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Main() {
+function Main() {
   return(
     <div>
       <h1>MAP GOES HERE FUCK YOU</h1>
@@ -11,3 +11,5 @@ export default function Main() {
     </div>
   )
 }
+
+export default Main;
