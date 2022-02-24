@@ -1,17 +1,22 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-class LoginPage extends Component{
+class LoginPage extends Component {
   render() {
-    return(
+    return (
       <div>
         <h1>WELCOME TO PCNJOY FUCKHEAD</h1>
         <h2>LOG THE FUCK IN BITCH</h2>
 
-        <a href="/main" onClick={() => { window.location.href = '/main'; }}>
+        <a
+          href="/main"
+          onClick={() => {
+            window.location.href = "/main";
+          }}
+        >
           Go to Main
         </a>
       </div>
-    )
+    );
   }
 }
 

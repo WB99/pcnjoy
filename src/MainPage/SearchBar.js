@@ -1,10 +1,8 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
 class SearchBar extends Component {
   render() {
-    return (
-      <div>SearchBar</div>
-    )
+    return <div>SearchBar</div>;
   }
 }
 

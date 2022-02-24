@@ -1,10 +1,8 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
 class SavedPlace extends Component {
   render() {
-    return (
-      <div>SavedPlace</div>
-    )
+    return <div>SavedPlace</div>;
   }
 }
 
