@@ -1,9 +1,7 @@
-import React, { Component } from "react";
+import React from "react";
 
-class Landmarks extends Component {
-  render() {
-    return <div>Landmarks</div>;
-  }
+function Landmarks() {
+  return <div>Landmarks</div>;
 }
 
 export default Landmarks;

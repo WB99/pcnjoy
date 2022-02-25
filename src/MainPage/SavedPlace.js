@@ -1,9 +1,7 @@
-import React, { Component } from "react";
+import React from "react";
 
-class SavedPlace extends Component {
-  render() {
-    return <div>SavedPlace</div>;
-  }
+function SavedPlace() {
+  return <div>SavedPlace</div>;
 }
 
 export default SavedPlace;

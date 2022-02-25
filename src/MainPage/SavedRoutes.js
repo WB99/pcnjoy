@@ -1,9 +1,7 @@
-import React, { Component } from "react";
+import React from "react";
 
-class SavedRoutes extends Component {
-  render() {
-    return <div>SavedRoutes</div>;
-  }
+function SavedRoutes() {
+  return <div>SavedRoutes</div>;
 }
 
 export default SavedRoutes;
