@@ -1,5 +1,5 @@
 import React from "react";
-import SearchBar from "./SearchBar";
+import AddRoutes from "./AddRoutes";
 import Landmarks from "./Landmarks";
 import SavedPlace from "./SavedPlace";
 import SavedRoutes from "./SavedRoutes";
@@ -24,13 +24,13 @@ function NavBar() {
           </a>
         </div>
       </div>
-      <hr class="solid"></hr>
-      <SearchBar />
-      <hr class="rounded"></hr>
+      <hr className="solid"></hr>
+      <AddRoutes />
+      <hr className="rounded"></hr>
       <Landmarks />
-      <hr class="solid"></hr>
+      <hr className="solid"></hr>
       <SavedPlace />
-      <hr class="solid"></hr>
+      <hr className="solid"></hr>
       <SavedRoutes />
     </div>
   );

@@ -1,5 +1,5 @@
 import React from "react";
-import SimpleMap from "./Map";
+import Map from "./Map";
 import NavBar from "./NavBar";
 
 import "./MainPage.css";
@@ -8,7 +8,7 @@ function MainPage() {
   return (
     <div className="root">
       <div className="Map">
-        <SimpleMap />
+        <Map />
       </div>
       <div className="NavBar">
         <NavBar />
