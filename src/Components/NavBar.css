@@ -3,11 +3,11 @@
   justify-content: space-around;
 }
 
-hr.rounded {
+.rounded {
   border-top: 8px solid #bbb;
   border-radius: 5px;
 }
 
-hr.solid {
+.solid {
   border-top: 3px solid #bbb;
 }
