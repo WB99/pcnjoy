@@ -47,13 +47,13 @@ function NavBar() {
             <Button onClick={handleSignOut}>Sign Out</Button>
           </div>
         </div>
-        <hr class="solid"></hr>
+        <hr className="solid"></hr>
         <SearchBar />
-        <hr class="rounded"></hr>
+        <hr className="rounded"></hr>
         <Landmarks />
-        <hr class="solid"></hr>
+        <hr className="solid"></hr>
         <SavedPlace />
-        <hr class="solid"></hr>
+        <hr className="solid"></hr>
         <SavedRoutes />
       </div>
     );
