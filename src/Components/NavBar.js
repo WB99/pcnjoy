@@ -12,7 +12,7 @@ import { Navigate } from "react-router-dom"
 
 import "./NavBar.css";
 
-function NavBar() {
+function NavBar(props) {
   const handleSignOut = () => {
     signOut(auth).then(() => {
       console.log("Sign out success")
@@ -48,7 +48,7 @@ function NavBar() {
           </div>
         </div>
         <hr className="solid"></hr>
-        <SearchBar />
+        <SearchBar setCoord={props.setCoord} setMarkers={props.setMarkers}/>
         <hr className="rounded"></hr>
         <Landmarks />
         <hr className="solid"></hr>

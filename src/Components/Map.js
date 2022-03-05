@@ -1,10 +1,12 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import {
   GoogleMap,
   useLoadScript,
   Marker,
   InfoWindow,
 } from "@react-google-maps/api";
+import Geocode from "react-geocode";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const libraries = ["places"];
 const mapContainerStyle = {
@@ -19,23 +21,44 @@ const options = {
   disableDefaultUI: true,
 };
 
-function Map() {
+Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API);
+Geocode.enableDebug();
+
+function Map(props) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API,
     libraries,
   });
-  const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
 
-  const onMapClick = useCallback((event) => {
-    setMarkers((current) => [
-      ...current,
-      {
-        lat: event.latLng.lat(),
-        lng: event.latLng.lng(),
-      },
-    ]);
-  }, []);
+  useEffect(() => {
+    let isMounted = true;
+    if (mapRef.current && props.coord && isMounted) {
+      mapRef.current.panTo(props.coord);
+      mapRef.current.setZoom(14);
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [props.coord]);
+
+  const onMapClick = useCallback(
+    (event) => {
+      try {
+        props.setMarkers((current) => [
+          ...current,
+          {
+            key: `${event.latLng.lat()},${event.latLng.lng()}`,
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng(),
+          },
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [props]
+  );
 
   const mapRef = useRef();
   const onMapLoad = useCallback((map) => {
@@ -55,9 +78,9 @@ function Map() {
         onClick={onMapClick}
         onLoad={onMapLoad}
       >
-        {markers.map((marker) => (
+        {props.markers.map((marker) => (
           <Marker
-            key={`${marker.lat}-${marker.lng}`}
+            key={`${marker.lat},${marker.lng}`}
             position={{ lat: marker.lat, lng: marker.lng }}
             onClick={() => {
               setSelected(marker);
@@ -67,12 +90,13 @@ function Map() {
 
         {selected ? (
           <InfoWindow
+            options={{ pixelOffset: new window.google.maps.Size(-1, -35) }}
             position={{ lat: selected.lat, lng: selected.lng }}
-            onCloseClick={() => {setSelected(null);}}
+            onCloseClick={() => {
+              setSelected(null);
+            }}
           >
-            <div>
-              <h1>Fuck YOU</h1>
-            </div>
+            <div>testing</div>
           </InfoWindow>
         ) : null}
       </GoogleMap>
