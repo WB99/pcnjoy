@@ -6,6 +6,7 @@ import {
   InfoWindow,
 } from "@react-google-maps/api";
 import Geocode from "react-geocode";
+import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const libraries = ["places"];
@@ -30,6 +31,7 @@ function Map(props) {
     libraries,
   });
   const [selected, setSelected] = useState(null);
+  const [address, setAddress] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -94,9 +96,30 @@ function Map(props) {
             position={{ lat: selected.lat, lng: selected.lng }}
             onCloseClick={() => {
               setSelected(null);
+              setAddress(null);
             }}
           >
-            <div>testing</div>
+            <div>
+              {Geocode.fromLatLng(selected.lat, selected.lng).then(
+                (Response) => {
+                  setAddress(Response.results[0].formatted_address);
+                  console.log(Response);
+                },
+                (Error) => {
+                  console.log(Error);
+                }
+              ) ? (
+                <h5>{address ? address.toString().replace(/[, ]?Singapore[ \d?]?/, "") : "Invalid Address"}</h5>
+              ) : (
+                <h5>Invalid Address</h5>
+              )}
+              <p>
+                {parseFloat(selected.lat).toFixed(3)}, {parseFloat(selected.lng).toFixed(3)}
+              </p>
+              <Button>Add to Saved Place</Button>
+              {' '}
+              <Button>Add Point to Route</Button>
+            </div>
           </InfoWindow>
         ) : null}
       </GoogleMap>
