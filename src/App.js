@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {Routes, Route, Navigate, BrowserRouter as Router} from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import MainPage from "./Pages/MainPage";
-
+import axios from 'axios'
 import { auth } from "./Firebase/firebase-config";
 
 export default function App() {
