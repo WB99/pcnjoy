@@ -18,15 +18,21 @@ function MainPage() {
   const [routeReq, setRouteReq] = useState(false)
   const [routeLatlngs, setrouteLatlngs] = useState([])
 
-  console.log(markers)
-
+  // console.log("marker check: ", markers[0].key)
+  
   useEffect(() => {
     getToken()
   }, [])
 
-  useEffect(() => {
-    getRoute("1.3634,103.8436", "1.3777,103.8977")
-  }, [routeReq])
+  // clear route everytime new point is added
+  // useEffect(() => { setrouteLatlngs([]) }, [markers])
+
+  // useEffect(() => {
+  //   if (markers.length > 0) {
+  //     plotRoute(markers[0].key, markers[1].key);
+  //     setRouteReq(false);
+  //   }
+  // }, [routeReq])
 
   async function getToken() {
     try {
@@ -68,15 +74,35 @@ function MainPage() {
   console.log("route data: ", routeData)
   
   
-  function plotRoute() {
-    const encoded = routeData.route_geometry;
-    console.log("encoded: ", encoded)
+  // async function plotRoute(start, end) {
+  //   console.log("PLOT ROUTE CALLED")
+  //   await getRoute(start, end);
+  //   const encoded = routeData.route_geometry;
 
-    var polyUtil = require('polyline-encoded');
+  //   var polyUtil = require('polyline-encoded');
 
-    const latlngArray = polyUtil.decode(encoded);
+  //   const latlngArray = polyUtil.decode(encoded);
     
-    // creds to matt
+  //   // creds to matt
+  //   var latlngs = []
+  //   latlngArray.forEach((item) =>{
+  //     const output = {
+  //       lat: item[0],
+  //       lng: item[1]
+  //     }
+  //     latlngs.push(output)
+  //   })
+
+  //   setrouteLatlngs(latlngs)
+  // }
+
+  async function plotRoute() {
+    console.log("PLOT ROUTE CALLED")
+
+    await getRoute(markers[0].key, markers[1].key);
+    const encoded = routeData.route_geometry;
+    var polyUtil = require('polyline-encoded');
+    const latlngArray = polyUtil.decode(encoded);
     var latlngs = []
     latlngArray.forEach((item) =>{
       const output = {
@@ -87,19 +113,22 @@ function MainPage() {
     })
 
     setrouteLatlngs(latlngs)
-    console.log("latlngs: ", routeLatlngs)
+    setRouteReq(false)
   }
+  
+  if( routeReq ){ plotRoute() }
 
+  console.log("GETROUTE latlngs: ", routeLatlngs)
   return (
     <div className="root">
       {/* <Button onClick={handleSignOut}>Sign Out</Button> */}
       <div className="Map">
-        <Map routeLatlngs={routeLatlngs} coord={coord} markers={markers} setMarkers={setMarkers} />
+        <Map routeLatlngs={routeLatlngs} coord={coord} markers={markers} setMarkers={setMarkers} routeData={routeData}/>
       </div>
       <div className="NavBar">
-        <NavBar setCoord={setCoord} markers={markers} setMarkers={setMarkers} />
-        <Button onClick={() => setRouteReq(true)}> ROUTE </Button>
-        <Button onClick={() => plotRoute()}> PLOT </Button>
+        <NavBar setCoord={setCoord} markers={markers} setMarkers={setMarkers} setRouteReq={setRouteReq}/>
+        {/* <Button onClick={() => setRouteReq(true)}> ROUTE </Button> */}
+        {/* <Button onClick={() => plotRoute()}> PLOT </Button> */}
       </div>
     </div>
   );

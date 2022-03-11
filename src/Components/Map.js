@@ -24,7 +24,6 @@ const options = {
 };
 
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API);
-console.log("API KEYY", process.env.REACT_APP_GOOGLE_MAPS_API)
 Geocode.enableDebug();
 
 function Map(props) {
@@ -36,13 +35,10 @@ function Map(props) {
   const [address, setAddress] = useState(null);
   const [check, setCheck] = useState(null);
 
-  console.log("props latlongtest: ", props.routeLatlngs)
-
   useEffect(() => {
     let isMounted = true;
     if (mapRef.current && props.coord && isMounted) {
       mapRef.current.panTo(props.coord);
-      mapRef.current.setZoom(14);
     }
     return () => {
       isMounted = false;
@@ -73,6 +69,9 @@ function Map(props) {
 
   if (loadError) return "Error loading maps";
   if (!isLoaded) return "Loading Maps";
+
+  // console.log("CHECK ROUTE: ", props.routeData.route_summary)
+  console.log("MAP CHECK latlong: ", props.routeLatlngs)
 
   return (
     <div>
@@ -106,6 +105,8 @@ function Map(props) {
               setSelected(null);
             }}
             opacity={0.5}
+            // SHUI QIS WASTED 3HOURS
+            // icon={{url:"http://maps.google.com/mapfiles/ms/icons/blue-dot.png"}}
           />
         ) : null}
 
@@ -152,13 +153,6 @@ function Map(props) {
               strokeColor: "#ff2527",
               strokeOpacity: 0.75,
               strokeWeight: 2,
-              // icons: [
-              //     {
-              //         icon: lineSymbol,
-              //         offset: "0",
-              //         repeat: "20px"
-              //     }
-              // ]
           }}
         />
 
