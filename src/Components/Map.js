@@ -4,6 +4,7 @@ import {
   useLoadScript,
   Marker,
   InfoWindow,
+  Polyline
 } from "@react-google-maps/api";
 import Geocode from "react-geocode";
 import { Button } from "react-bootstrap";
@@ -23,6 +24,7 @@ const options = {
 };
 
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API);
+console.log("API KEYY", process.env.REACT_APP_GOOGLE_MAPS_API)
 Geocode.enableDebug();
 
 function Map(props) {
@@ -32,6 +34,8 @@ function Map(props) {
   });
   const [selected, setSelected] = useState(null);
   const [address, setAddress] = useState(null);
+
+  console.log("props latlongtest: ", props.routeLatlngs)
 
   useEffect(() => {
     let isMounted = true;
@@ -122,6 +126,24 @@ function Map(props) {
             </div>
           </InfoWindow>
         ) : null}
+
+        <Polyline
+          path={props.routeLatlngs}
+          geodesic={true}
+          options={{
+              strokeColor: "#ff2527",
+              strokeOpacity: 0.75,
+              strokeWeight: 2,
+              // icons: [
+              //     {
+              //         icon: lineSymbol,
+              //         offset: "0",
+              //         repeat: "20px"
+              //     }
+              // ]
+          }}
+        />
+
       </GoogleMap>
     </div>
   );
