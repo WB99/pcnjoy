@@ -97,7 +97,7 @@ function MainPage() {
         <Map routeLatlngs={routeLatlngs} coord={coord} markers={markers} setMarkers={setMarkers} />
       </div>
       <div className="NavBar">
-        <NavBar setCoord={setCoord} setMarkers={setMarkers} />
+        <NavBar setCoord={setCoord} markers={markers} setMarkers={setMarkers} />
         <Button onClick={() => setRouteReq(true)}> ROUTE </Button>
         <Button onClick={() => plotRoute()}> PLOT </Button>
       </div>
