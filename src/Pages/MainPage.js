@@ -18,7 +18,6 @@ function MainPage() {
   // }
   const [coord, setCoord] = useState({ lat: 1.3521, lng: 103.8198 });
   const [markers, setMarkers] = useState([]);
-  console.log(markers)
   return (
     <div className="root">
       {/* <Button onClick={handleSignOut}>Sign Out</Button> */}
@@ -26,7 +25,7 @@ function MainPage() {
         <Map coord={coord} markers={markers} setMarkers={setMarkers} />
       </div>
       <div className="NavBar">
-        <NavBar setCoord={setCoord} setMarkers={setMarkers} />
+        <NavBar setCoord={setCoord} markers={markers} setMarkers={setMarkers} />
       </div>
     </div>
   );

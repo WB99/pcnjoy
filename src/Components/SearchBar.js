@@ -9,8 +9,6 @@ import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from "use-places-autocomplete";
-import { Button } from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "@reach/combobox/styles.css";
 
 function SearchBar(props) {
@@ -23,13 +21,13 @@ function SearchBar(props) {
   } = usePlacesAutocomplete({
     requestOptions: {
       location: { lat: () => 1.3521, lng: () => 103.8198 },
-      radius: 0 * 1000,
+      radius: 40 * 1000,
+      componentRestrictions: { country: "sg" },
     },
   });
 
   return (
     <div>
-      <p>SearchBar</p>
       <Combobox
         onSelect={async (address) => {
           setValue(address, false);
@@ -38,14 +36,26 @@ function SearchBar(props) {
             const results = await getGeocode({ address });
             const coord = await getLatLng(results[0]);
             props.setCoord(coord);
-            props.setMarkers((current) => [
-              ...current,
-              {
-                key: `${coord.lat},${coord.lng}`,
-                lat: coord.lat,
-                lng: coord.lng,
-              },
-            ]);
+            props.setMarkers((current) => {
+              if (current.length > 0) {
+                let newArray = [...current];
+                newArray[props.id] = {
+                  key: `${coord.lat},${coord.lng}`,
+                  lat: coord.lat,
+                  lng: coord.lng,
+                };
+                return newArray;
+              } else {
+                return [
+                  ...current,
+                  {
+                    key: `${coord.lat},${coord.lng}`,
+                    lat: coord.lat,
+                    lng: coord.lng,
+                  },
+                ];
+              }
+            });
           } catch (error) {
             console.log(error);
           }
@@ -66,8 +76,6 @@ function SearchBar(props) {
             ))}
         </ComboboxPopover>
       </Combobox>
-
-      <Button>Search</Button>
     </div>
   );
 }
