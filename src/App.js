@@ -1,54 +1,32 @@
-import './App.css';
-import React, {useState} from 'react';
-import {Routes, Route, Navigate, BrowserRouter as Router} from "react-router-dom";
+import "./App.css";
+import React, { useState } from "react";
+import {
+  Routes,
+  Route,
+  Navigate,
+  BrowserRouter as Router,
+} from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import MainPage from "./Pages/MainPage";
-import axios from 'axios'
 import { auth } from "./Firebase/firebase-config";
 
 export default function App() {
-  
   const [isUserSignedIn, setIsUserSignedIn] = useState(true);
-  auth.onAuthStateChanged((user)=>{
-    if(user) {
+  auth.onAuthStateChanged((user) => {
+    if (user) {
       return setIsUserSignedIn(true);
-    }
-    else {
+    } else {
       setIsUserSignedIn(false);
     }
-  })
-
-  // if(isUserSignedIn) {
-  //   return (
-  //     <Router>
-  //       <Routes>
-  //         {/* <Route path="/*" element={<Navigate to='/login'/>}/> */}
-  //         <Route exact path = "/main" element = {<MainPage />}/>
-  //       </Routes>
-  //     </Router>
-  //   )
-  // }
-
-  // else {
-  //   return (
-  //     <Router>
-  //       <Routes>
-  //         {/* <Route path="/*" element={<Navigate to='/login'/>}/> */}
-  //         <Route exact path = "/login" element = {<LoginPage />} />
-  //       </Routes>
-  //     </Router>
-  //   )
-  // }
-
+  });
 
   return (
     <Router>
       <Routes>
-        <Route path="/*" element={<Navigate to='/login'/>}/>
-        <Route exact path = "/login" element = {<LoginPage />} />
-        <Route exact path = "/main" element = {<MainPage />}/>
+        <Route path="/*" element={<Navigate to="/login" />} />
+        <Route exact path="/login" element={<LoginPage />} />
+        <Route exact path="/main" element={<MainPage />} />
       </Routes>
     </Router>
-    )
-    
+  );
 }

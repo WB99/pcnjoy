@@ -25,8 +25,6 @@ function NavBar(props) {
         console.log(error);
       });
   };
-  
-  // console.log("SHOW ME THE MARKERS: ", props.markers)
 
   const [userSignOut, setUserSignOut] = useState(false);
   auth.onAuthStateChanged((user) => {
@@ -56,7 +54,6 @@ function NavBar(props) {
     );
   };
 
-  // console.log("user signed out? ", userSignOut);
   function routeHandler(showRoute){
     if(showRoute){
       props.setRouteReq(true);

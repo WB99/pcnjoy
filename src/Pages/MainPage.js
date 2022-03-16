@@ -1,7 +1,6 @@
-import React, { useCallback, useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Map from "../Components/Map";
 import NavBar from "../Components/NavBar";
-// import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import classes from "./MainPage.module.css";
 import axios from "axios";
@@ -25,8 +24,6 @@ function MainPage() {
   const [routeReq, setRouteReq] = useState(false)
   const [isRouted, setRouteState] = useState(false);
   const [routeLatlngs, setrouteLatlngs] = useState([])
-
-  // console.log("marker check: ", markers[0].key)
   
   useEffect(() => {
     getToken()
@@ -40,7 +37,6 @@ function MainPage() {
         })
       
       const data = await response.json()
-      // console.log("getToken Data: ", data)
       setToken(data.access_token)
 
     } catch(error) {
@@ -51,26 +47,22 @@ function MainPage() {
   // oneMap Routing Api
   async function getRoute(start, end) {
     try {
-      const response = await fetch('http://127.0.0.1:9999/route', {
-        method: 'POST',
-        headers: {'content-type': 'application/json'},
+      const response = await fetch("http://127.0.0.1:9999/route", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({
-            start: start,
-            end: end,
-            routeType: "cycle",
-            token: token
-        })
-      })
-      const data = await response.json()
-      // console.log("getRoute Data: ", data)
-      setRouteData(data)
-    } catch(error) {
-      console.log(error)
+          start: start,
+          end: end,
+          routeType: "cycle",
+          token: token,
+        }),
+      });
+      const data = await response.json();
+      setRouteData(data);
+    } catch (error) {
+      console.log(error);
     }
   }
-
-  // console.log("route data: ", routeData)
-  
 
   async function plotRoute() {
     console.log("PLOT ROUTE CALLED")
@@ -100,10 +92,10 @@ function MainPage() {
 
     // decode polyline
     const encoded = routeData.route_geometry;
-    var polyUtil = require('polyline-encoded');
+    var polyUtil = require("polyline-encoded");
     const latlngArray = polyUtil.decode(encoded);
-    var latlngs = []
-    latlngArray.forEach((item) =>{
+    var latlngs = [];
+    latlngArray.forEach((item) => {
       const output = {
         lat: item[0],
         lng: item[1]
@@ -115,12 +107,9 @@ function MainPage() {
   }
   
   if( routeReq ){ plotRoute() }
-  // console.log("Clean data :", cleanRouteData)
 
-  // console.log("GETROUTE latlngs: ", routeLatlngs)
   return (
     <div className={classes.root}>
-      {/* <Button onClick={handleSignOut}>Sign Out</Button> */}
       <div className={classes.Map}>
         <Map routeLatlngs={routeLatlngs} coord={coord} markers={markers} setMarkers={setMarkers} routeData={routeData}/>
       </div>
@@ -128,8 +117,6 @@ function MainPage() {
         <NavBar setCoord={setCoord} markers={markers} setMarkers={setMarkers} 
         setRouteReq={setRouteReq} setRouteState={setRouteState} isRouted={isRouted}
         cleanRouteData={cleanRouteData} setrouteLatlngs={setrouteLatlngs}/>
-        {/* <Button onClick={() => setRouteReq(true)}> ROUTE </Button> */}
-        {/* <Button onClick={() => plotRoute()}> PLOT </Button> */}
       </div>
     </div>
   );
