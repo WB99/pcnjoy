@@ -71,7 +71,7 @@ function Map(props) {
   if (!isLoaded) return "Loading Maps";
 
   // console.log("CHECK ROUTE: ", props.routeData.route_summary)
-  console.log("MAP CHECK latlong: ", props.routeLatlngs)
+  // console.log("MAP CHECK latlong: ", props.routeLatlngs)
 
   return (
     <div>

@@ -4,11 +4,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { auth } from '../Firebase/firebase-config';
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { Navigate } from "react-router-dom"
-import "./LoginPage.css";
+import classes from  "./LoginPage.module.css";
+import "@fontsource/montserrat";
 
 function LoginPage() {
-
-
 
   const handleSignIn = () => {
     const google_provider = new GoogleAuthProvider();
@@ -40,15 +39,15 @@ function LoginPage() {
     return (
 
       
-      <div className='login-root'>
+      <div className={classes.root}>
 
-      <div className='loginformbackground'>
-        <div className = 'loginform'>
-        <h1>PCNjoy</h1>
-        <h2>Welcome</h2>
-        <p>Sign in to plan your next adventure!</p>
+      <div className={classes.loginformbackground}>
+        <div className = {classes.loginform}>
+        <h1 className={classes.title}>PCNjoy</h1>
+        <h2 className={classes.subtitle}>Welcome</h2>
+        <p className={classes.text}>Sign in to plan your next adventure!</p>
         
-        <Button className='button' onClick={handleSignIn}>Sign In with Google</Button>
+        <Button className={classes.button} onClick={handleSignIn}>Sign In with Google</Button>
         </div>
         </div>
 

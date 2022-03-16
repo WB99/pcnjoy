@@ -6,6 +6,7 @@
   "dependencies": {
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
+    "@fontsource/montserrat": "^4.5.5",
     "@mapbox/polyline": "^1.1.1",
     "@mui/material": "^5.4.3",
     "@reach/combobox": "^0.16.5",

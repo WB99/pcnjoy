@@ -10,7 +10,8 @@ import { auth } from "../Firebase/firebase-config";
 import { signOut } from "firebase/auth";
 import { Navigate } from "react-router-dom";
 
-import "./NavBar.css";
+import classes from  "./NavBar.module.css";
+import Directions from "./Directions"
 
 const searchBarLimit = 5;
 
@@ -56,36 +57,68 @@ function NavBar(props) {
   };
 
   // console.log("user signed out? ", userSignOut);
+  function routeHandler(showRoute){
+    if(showRoute){
+      props.setRouteReq(true);
+      props.setRouteState(true);
+    } else {
+      props.setRouteState(false);
+      props.setrouteLatlngs([]);
+    }
+  }
 
-  if (userSignOut) {
-    return <Navigate to="/login" />;
-  } else {
-    return (
-      <div className="SideBar">
-        <div className="title">
-          <div>PCNJOY</div>
-          <div>
-            {" "}
-            <Button onClick={handleSignOut}>Sign Out</Button>
-          </div>
-        </div>
-        <hr className="solid"></hr>
+  let body, buttons;
+    if (props.isRouted){
+      buttons = <div>
+        <Button variant="danger" onClick={() => routeHandler(false)}> Back </Button>
+        <Button variant="secondary"> Add to Saved Routes </Button>
+      </div>
 
-        <p>SearchBar</p>
-        {searchBar}
+      body = <div>
+        <hr className={classes.rounded}></hr>
+        <Directions data={props.cleanRouteData}/>
+      </div>
+
+    } else {
+      buttons = <div>
         <Button
           onClick={createSearchBar}
           disabled={searchBar.length === searchBarLimit}
         >
           + Add Point to Route
         </Button>
-        <Button disabled={props.markers.length < 2} onClick={() => props.setRouteReq(true)}>Done</Button>
-        <hr className="rounded"></hr>
+        <Button disabled={props.markers.length < 2} onClick={() => routeHandler(true)}>Done</Button>
+      </div>
+      
+      body = <div>
+        <hr className={classes.rounded}></hr>
         <Landmarks />
-        <hr className="solid"></hr>
+        <hr className={classes.solid}></hr>
         <SavedPlace />
-        <hr className="solid"></hr>
+        <hr className={classes.solid}></hr>
         <SavedRoutes />
+      </div>
+    }
+
+  if (userSignOut) {
+    return <Navigate to="/login" />;
+  } else {
+    return (
+      <div>
+        <div className={classes.title}>
+          <div>PCNJOY</div>
+          <div>
+            {" "}
+            <Button onClick={handleSignOut}>Sign Out</Button>
+          </div>
+        </div>
+        <hr className={classes.solid}></hr>
+
+        <p>SearchBar</p>
+        {searchBar}
+        {buttons}
+        {body}
+
       </div>
     );
   }

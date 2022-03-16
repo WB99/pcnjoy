@@ -1,4 +1,4 @@
-.login-root {
+.root {
   
     background-image: url("./background-login.jpg");
     position:fixed;
@@ -42,11 +42,11 @@
   border-radius: 25px;
 }
 
-h1{
+.title{
   /* font-weight: bold; */
   text-align: center;
 
-  /* font-family: cursive; */
+  /* font-family: Montserrat; */
   /* font-family: 'open sans', sans-serif; */
   padding: 3rem 0;
   margin: 0;
@@ -54,19 +54,19 @@ h1{
 
 
 
-  font-family: cursive;font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px;
+  font-family: Montserrat;font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px;
 }
 
-h2{
+.subtitle{
   text-align: center;
-  font-family: cursive;font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px;
+  font-family: Montserrat;font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px;
   font-size: 2rem;
 }
 
-p{
+.text{
   text-align: center;
   font-size: 0,5rem;
-  font-family: cursive; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px;
+  font-family: Montserrat; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px;
 }
 
 
@@ -85,7 +85,7 @@ p{
   border-radius: 25px;
   width: 80%;
   height: 40px;
-  font-family: cursive; font-style: normal; font-variant: normal;
+  font-family: Montserrat; font-style: normal; font-variant: normal;
   font-size: 1.3rem;
   color: white;
   font-weight: 700;

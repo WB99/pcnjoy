@@ -3,7 +3,7 @@ import Map from "../Components/Map";
 import NavBar from "../Components/NavBar";
 // import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./MainPage.css";
+import classes from "./MainPage.module.css";
 import axios from "axios";
 import { Button } from "react-bootstrap";
 
@@ -14,8 +14,16 @@ function MainPage() {
   const [markers, setMarkers] = useState([]);
   const [token, setToken] = useState();
   const [routeData, setRouteData] = useState({})
+  const [cleanRouteData, setCleanRouteData] = useState(
+    {
+      duration: null,
+      distance: null,
+      via: null,
+      directions: []
+    })
   
   const [routeReq, setRouteReq] = useState(false)
+  const [isRouted, setRouteState] = useState(false);
   const [routeLatlngs, setrouteLatlngs] = useState([])
 
   // console.log("marker check: ", markers[0].key)
@@ -23,16 +31,6 @@ function MainPage() {
   useEffect(() => {
     getToken()
   }, [])
-
-  // clear route everytime new point is added
-  // useEffect(() => { setrouteLatlngs([]) }, [markers])
-
-  // useEffect(() => {
-  //   if (markers.length > 0) {
-  //     plotRoute(markers[0].key, markers[1].key);
-  //     setRouteReq(false);
-  //   }
-  // }, [routeReq])
 
   async function getToken() {
     try {
@@ -42,7 +40,7 @@ function MainPage() {
         })
       
       const data = await response.json()
-      console.log("getToken Data: ", data)
+      // console.log("getToken Data: ", data)
       setToken(data.access_token)
 
     } catch(error) {
@@ -71,35 +69,36 @@ function MainPage() {
     }
   }
 
-  console.log("route data: ", routeData)
+  // console.log("route data: ", routeData)
   
-  
-  // async function plotRoute(start, end) {
-  //   console.log("PLOT ROUTE CALLED")
-  //   await getRoute(start, end);
-  //   const encoded = routeData.route_geometry;
-
-  //   var polyUtil = require('polyline-encoded');
-
-  //   const latlngArray = polyUtil.decode(encoded);
-    
-  //   // creds to matt
-  //   var latlngs = []
-  //   latlngArray.forEach((item) =>{
-  //     const output = {
-  //       lat: item[0],
-  //       lng: item[1]
-  //     }
-  //     latlngs.push(output)
-  //   })
-
-  //   setrouteLatlngs(latlngs)
-  // }
 
   async function plotRoute() {
     console.log("PLOT ROUTE CALLED")
-
     await getRoute(markers[0].key, markers[1].key);
+
+    // data cleaning
+    const timeSeconds = routeData.route_summary.total_time;
+    const timeHM = (timeSeconds >= 3600 ? 
+      Math.floor(timeSeconds/3600) + "hr " + Math.floor(timeSeconds%3600/60) + "min" :
+      Math.floor(timeSeconds/60) + "min"
+    )
+    
+    const distKm = Math.round((routeData.route_summary.total_distance)/1000) + "km";
+    const via = routeData.route_name.join(", ")
+
+    const directions = []
+    routeData.route_instructions.forEach((item) => {
+      directions.push(item[9])
+    })
+
+    setCleanRouteData({
+      duration: timeHM,
+      distance: distKm,
+      via: via,
+      directions: directions
+    })
+
+    // decode polyline
     const encoded = routeData.route_geometry;
     var polyUtil = require('polyline-encoded');
     const latlngArray = polyUtil.decode(encoded);
@@ -111,22 +110,24 @@ function MainPage() {
       }
       latlngs.push(output)
     })
-
-    setrouteLatlngs(latlngs)
     setRouteReq(false)
+    setrouteLatlngs(latlngs)
   }
   
   if( routeReq ){ plotRoute() }
+  // console.log("Clean data :", cleanRouteData)
 
-  console.log("GETROUTE latlngs: ", routeLatlngs)
+  // console.log("GETROUTE latlngs: ", routeLatlngs)
   return (
-    <div className="root">
+    <div className={classes.root}>
       {/* <Button onClick={handleSignOut}>Sign Out</Button> */}
-      <div className="Map">
+      <div className={classes.Map}>
         <Map routeLatlngs={routeLatlngs} coord={coord} markers={markers} setMarkers={setMarkers} routeData={routeData}/>
       </div>
-      <div className="NavBar">
-        <NavBar setCoord={setCoord} markers={markers} setMarkers={setMarkers} setRouteReq={setRouteReq}/>
+      <div className={classes.NavBar}>
+        <NavBar setCoord={setCoord} markers={markers} setMarkers={setMarkers} 
+        setRouteReq={setRouteReq} setRouteState={setRouteState} isRouted={isRouted}
+        cleanRouteData={cleanRouteData} setrouteLatlngs={setrouteLatlngs}/>
         {/* <Button onClick={() => setRouteReq(true)}> ROUTE </Button> */}
         {/* <Button onClick={() => plotRoute()}> PLOT </Button> */}
       </div>
