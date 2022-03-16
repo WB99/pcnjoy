@@ -4,7 +4,7 @@ import {
   useLoadScript,
   Marker,
   InfoWindow,
-  Polyline
+  Polyline,
 } from "@react-google-maps/api";
 import Geocode from "react-geocode";
 import { Button } from "react-bootstrap";
@@ -70,9 +70,6 @@ function Map(props) {
   if (loadError) return "Error loading maps";
   if (!isLoaded) return "Loading Maps";
 
-  // console.log("CHECK ROUTE: ", props.routeData.route_summary)
-  console.log("MAP CHECK latlong: ", props.routeLatlngs)
-
   return (
     <div>
       <GoogleMap
@@ -104,9 +101,7 @@ function Map(props) {
               setCheck(null);
               setSelected(null);
             }}
-            opacity={0.5}
-            // SHUI QIS WASTED 3HOURS
-            // icon={{url:"http://maps.google.com/mapfiles/ms/icons/blue-dot.png"}}
+            icon={{url:"http://maps.google.com/mapfiles/ms/icons/blue-dot.png"}}
           />
         ) : null}
 
@@ -150,12 +145,11 @@ function Map(props) {
           path={props.routeLatlngs}
           geodesic={true}
           options={{
-              strokeColor: "#ff2527",
-              strokeOpacity: 0.75,
-              strokeWeight: 2,
+            strokeColor: "#ff2527",
+            strokeOpacity: 0.75,
+            strokeWeight: 2,
           }}
         />
-
       </GoogleMap>
     </div>
   );

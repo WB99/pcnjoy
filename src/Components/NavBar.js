@@ -24,8 +24,6 @@ function NavBar(props) {
         console.log(error);
       });
   };
-  
-  // console.log("SHOW ME THE MARKERS: ", props.markers)
 
   const [userSignOut, setUserSignOut] = useState(false);
   auth.onAuthStateChanged((user) => {
@@ -55,8 +53,6 @@ function NavBar(props) {
     );
   };
 
-  // console.log("user signed out? ", userSignOut);
-
   if (userSignOut) {
     return <Navigate to="/login" />;
   } else {
@@ -79,7 +75,12 @@ function NavBar(props) {
         >
           + Add Point to Route
         </Button>
-        <Button disabled={props.markers.length < 2} onClick={() => props.setRouteReq(true)}>Done</Button>
+        <Button
+          disabled={props.markers.length < 2}
+          onClick={() => props.setRouteReq(true)}
+        >
+          Done
+        </Button>
         <hr className="rounded"></hr>
         <Landmarks />
         <hr className="solid"></hr>
