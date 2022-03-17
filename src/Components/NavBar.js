@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SearchBar from "./SearchBar";
 import Landmarks from "./Landmarks";
 import SavedPlace from "./SavedPlace";
@@ -10,12 +10,24 @@ import { auth } from "../Firebase/firebase-config";
 import { signOut } from "firebase/auth";
 import { Navigate } from "react-router-dom";
 
-import classes from  "./NavBar.module.css";
-import Directions from "./Directions"
+import classes from "./NavBar.module.css";
+import Directions from "./Directions";
 
 const searchBarLimit = 5;
+var preSearchBarCount = 0;
 
 function NavBar(props) {
+  const [userSignOut, setUserSignOut] = useState(false);
+  const [searchBar, setSearchBar] = useState([
+    <SearchBar
+      setCoord={props.setCoord}
+      markers={props.markers}
+      setMarkers={props.setMarkers}
+      address={props.address}
+      id={0}
+    />,
+  ]);
+
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
@@ -26,7 +38,6 @@ function NavBar(props) {
       });
   };
 
-  const [userSignOut, setUserSignOut] = useState(false);
   auth.onAuthStateChanged((user) => {
     if (user) {
       return setUserSignOut(false);
@@ -35,27 +46,98 @@ function NavBar(props) {
     }
   });
 
-  const [searchBar, setSearchBar] = useState([
-    <SearchBar
-      setCoord={props.setCoord}
-      setMarkers={props.setMarkers}
-      id={0}
-    />,
-  ]);
+  useEffect(() => {
+    if (props.markers.length > preSearchBarCount) {
+      if (
+        props.markers.length !== 0 &&
+        props.markers.length > searchBar.length
+      ) {
+        createSearchBar();
+      }
+    } else if (props.markers.length < preSearchBarCount) {
+      destroySearchBar();
+    }
+    preSearchBarCount = props.markers.length;
+  }, [props.markers]);
+
   const createSearchBar = () => {
-    setSearchBar(
-      searchBar.concat(
-        <SearchBar
-          setCoord={props.setCoord}
-          setMarkers={props.setMarkers}
-          id={searchBar.length}
-        />
-      )
-    );
+    props.setAddress(null)
+    if (searchBar.length < searchBarLimit) {
+      setSearchBar((current) => {
+        if (current.length > 0) {
+          let newArray = [...current];
+          newArray[current.length] = (
+            <SearchBar
+              setCoord={props.setCoord}
+              markers={props.markers}
+              setMarkers={props.setMarkers}
+              address={props.address}
+              id={current.length}
+            />
+          );
+          return newArray;
+        } else {
+          return [
+            ...current,
+            <SearchBar
+              setCoord={props.setCoord}
+              markers={props.markers}
+              setMarkers={props.setMarkers}
+              address={props.address}
+              id={0}
+            />,
+          ];
+        }
+      });
+    }
   };
 
-  function routeHandler(showRoute){
-    if(showRoute){
+  const destroySearchBar = () => {
+    setSearchBar([]);
+    if (props.markers.length === 0) {
+      setSearchBar([
+        <SearchBar
+          setCoord={props.setCoord}
+          markers={props.markers}
+          setMarkers={props.setMarkers}
+          address={props.address}
+          id={0}
+        />,
+      ]);
+    } else {
+      props.markers.forEach(() => {
+        setSearchBar((current) => {
+          if (current.length > 0) {
+            let newArray = [...current];
+            newArray[current.length] = (
+              <SearchBar
+                setCoord={props.setCoord}
+                markers={props.markers}
+                setMarkers={props.setMarkers}
+                address={props.address}
+                id={current.length}
+              />
+            );
+            return newArray;
+          } else {
+            return [
+              ...current,
+              <SearchBar
+                setCoord={props.setCoord}
+                markers={props.markers}
+                setMarkers={props.setMarkers}
+                address={props.address}
+                id={0}
+              />,
+            ];
+          }
+        });
+      });
+    }
+  };
+
+  function routeHandler(showRoute) {
+    if (showRoute) {
       props.setRouteReq(true);
       props.setRouteState(true);
     } else {
@@ -65,29 +147,43 @@ function NavBar(props) {
   }
 
   let body, buttons;
-    if (props.isRouted){
-      buttons = <div>
-        <Button variant="danger" onClick={() => routeHandler(false)}> Back </Button>
+  if (props.isRouted) {
+    buttons = (
+      <div>
+        <Button variant="danger" onClick={() => routeHandler(false)}>
+          {" "}
+          Back{" "}
+        </Button>
         <Button variant="secondary"> Add to Saved Routes </Button>
       </div>
+    );
 
-      body = <div>
+    body = (
+      <div>
         <hr className={classes.rounded}></hr>
-        <Directions data={props.cleanRouteData}/>
+        <Directions data={props.cleanRouteData} />
       </div>
-
-    } else {
-      buttons = <div>
+    );
+  } else {
+    buttons = (
+      <div>
         <Button
           onClick={createSearchBar}
-          disabled={searchBar.length === searchBarLimit}
+          disabled={searchBar.length >= searchBarLimit}
         >
           + Add Point to Route
         </Button>
-        <Button disabled={props.markers.length < 2} onClick={() => routeHandler(true)}>Done</Button>
+        <Button
+          disabled={props.markers.length < 2}
+          onClick={() => routeHandler(true)}
+        >
+          Done
+        </Button>
       </div>
-      
-      body = <div>
+    );
+
+    body = (
+      <div>
         <hr className={classes.rounded}></hr>
         <Landmarks />
         <hr className={classes.solid}></hr>
@@ -95,7 +191,8 @@ function NavBar(props) {
         <hr className={classes.solid}></hr>
         <SavedRoutes />
       </div>
-    }
+    );
+  }
 
   if (userSignOut) {
     return <Navigate to="/login" />;
@@ -111,11 +208,9 @@ function NavBar(props) {
         </div>
         <hr className={classes.solid}></hr>
 
-        <p>SearchBar</p>
         {searchBar}
         {buttons}
         {body}
-
       </div>
     );
   }
