@@ -14,7 +14,6 @@ import classes from "./NavBar.module.css";
 import Directions from "./Directions";
 
 const searchBarLimit = 5;
-var preSearchBarCount = 0;
 
 function NavBar(props) {
   const [userSignOut, setUserSignOut] = useState(false);
@@ -23,8 +22,9 @@ function NavBar(props) {
       setCoord={props.setCoord}
       markers={props.markers}
       setMarkers={props.setMarkers}
-      address={props.address}
+      address={null}
       id={0}
+      key={0}
     />,
   ]);
 
@@ -47,65 +47,9 @@ function NavBar(props) {
   });
 
   useEffect(() => {
-    if (props.markers.length > preSearchBarCount) {
-      if (
-        props.markers.length !== 0 &&
-        props.markers.length > searchBar.length
-      ) {
-        createSearchBar();
-      }
-    } else if (props.markers.length < preSearchBarCount) {
-      destroySearchBar();
-    }
-    preSearchBarCount = props.markers.length;
-  }, [props.markers]);
-
-  const createSearchBar = () => {
-    props.setAddress(null)
-    if (searchBar.length < searchBarLimit) {
-      setSearchBar((current) => {
-        if (current.length > 0) {
-          let newArray = [...current];
-          newArray[current.length] = (
-            <SearchBar
-              setCoord={props.setCoord}
-              markers={props.markers}
-              setMarkers={props.setMarkers}
-              address={props.address}
-              id={current.length}
-            />
-          );
-          return newArray;
-        } else {
-          return [
-            ...current,
-            <SearchBar
-              setCoord={props.setCoord}
-              markers={props.markers}
-              setMarkers={props.setMarkers}
-              address={props.address}
-              id={0}
-            />,
-          ];
-        }
-      });
-    }
-  };
-
-  const destroySearchBar = () => {
     setSearchBar([]);
-    if (props.markers.length === 0) {
-      setSearchBar([
-        <SearchBar
-          setCoord={props.setCoord}
-          markers={props.markers}
-          setMarkers={props.setMarkers}
-          address={props.address}
-          id={0}
-        />,
-      ]);
-    } else {
-      props.markers.forEach(() => {
+    if (props.markers.length > 0) {
+      props.markers.forEach((marker) => {
         setSearchBar((current) => {
           if (current.length > 0) {
             let newArray = [...current];
@@ -114,8 +58,9 @@ function NavBar(props) {
                 setCoord={props.setCoord}
                 markers={props.markers}
                 setMarkers={props.setMarkers}
-                address={props.address}
+                address={marker.address}
                 id={current.length}
+                key={current.length}
               />
             );
             return newArray;
@@ -126,12 +71,74 @@ function NavBar(props) {
                 setCoord={props.setCoord}
                 markers={props.markers}
                 setMarkers={props.setMarkers}
-                address={props.address}
+                address={marker.address}
                 id={0}
+                key={0}
               />,
             ];
           }
         });
+      });
+    } else {
+      setSearchBar([
+        <SearchBar
+          setCoord={props.setCoord}
+          markers={props.markers}
+          setMarkers={props.setMarkers}
+          address={null}
+          id={0}
+          key={0}
+        />,
+      ]);
+    }
+  }, [props.markers]);
+
+  useEffect(() => {
+    if (props.mapsLoaded) {
+      setSearchBar([
+        <SearchBar
+          setCoord={props.setCoord}
+          markers={props.markers}
+          setMarkers={props.setMarkers}
+          address={null}
+          id={0}
+          key={0}
+        />,
+      ]);
+    } else {
+      setSearchBar([])
+    }
+  }, [props.mapsLoaded])
+
+  const createSearchBar = () => {
+    if (searchBar.length < searchBarLimit) {
+      setSearchBar((current) => {
+        if (current.length > 0) {
+          let newArray = [...current];
+          newArray[current.length] = (
+            <SearchBar
+              setCoord={props.setCoord}
+              markers={props.markers}
+              setMarkers={props.setMarkers}
+              address={null}
+              id={current.length}
+              key={current.length}
+            />
+          );
+          return newArray;
+        } else {
+          return [
+            ...current,
+            <SearchBar
+              setCoord={props.setCoord}
+              markers={props.markers}
+              setMarkers={props.setMarkers}
+              address={null}
+              id={0}
+              key={0}
+            />,
+          ];
+        }
       });
     }
   };

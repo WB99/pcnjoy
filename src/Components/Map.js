@@ -70,6 +70,7 @@ function Map(props) {
         let newArray = [...current];
         newArray[current.length] = {
           key: `${props.selected.lat},${props.selected.lng}`,
+          address: `${props.address}`,
           lat: props.selected.lat,
           lng: props.selected.lng,
         };
@@ -79,6 +80,7 @@ function Map(props) {
           ...current,
           {
             key: `${props.selected.lat},${props.selected.lng}`,
+            address: `${props.address}`,
             lat: props.selected.lat,
             lng: props.selected.lng,
           },
@@ -104,8 +106,11 @@ function Map(props) {
     props.setSelected(null);
   };
 
-  if (loadError) return "Error loading maps";
-  if (!isLoaded) return "Loading Maps";
+  if (!isLoaded) {
+    return "Loading Maps";
+  } else {
+    props.setMapsLoaded(true);
+  }
 
   return (
     <div>
@@ -156,19 +161,17 @@ function Map(props) {
             <div>
               {Geocode.fromLatLng(props.selected.lat, props.selected.lng).then(
                 (Response) => {
-                  props.setAddress(Response.results[0].formatted_address);
+                  props.setAddress(
+                    Response.results[0].formatted_address
+                      .toString()
+                      .replace(/(, )*Singapore( (\d)*)?/, "")
+                  );
                 },
                 (Error) => {
                   console.log(Error);
                 }
               ) ? (
-                <h5>
-                  {props.address
-                    ? props.address
-                        .toString()
-                        .replace(/(, )*Singapore( (\d)*)?/, "")
-                    : "Invalid Address"}
-                </h5>
+                <h5>{props.address ? props.address : "Invalid Address"}</h5>
               ) : (
                 <h5>Invalid Address</h5>
               )}

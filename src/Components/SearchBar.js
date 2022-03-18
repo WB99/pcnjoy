@@ -4,7 +4,7 @@ import {
   ComboboxOption,
   ComboboxPopover,
 } from "@reach/combobox";
-import React from "react";
+import React, { useEffect } from "react";
 import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
@@ -29,6 +29,10 @@ function SearchBar(props) {
       componentRestrictions: { country: "sg" },
     },
   });
+  
+  useEffect(() => {
+    setValue("")
+  }, [props.markers])
 
   return (
     <div>
@@ -45,6 +49,7 @@ function SearchBar(props) {
                 let newArray = [...current];
                 newArray[props.id] = {
                   key: `${coord.lat},${coord.lng}`,
+                  address: `${address}`,
                   lat: coord.lat,
                   lng: coord.lng,
                 };
@@ -54,6 +59,7 @@ function SearchBar(props) {
                   ...current,
                   {
                     key: `${coord.lat},${coord.lng}`,
+                    address: `${address}`,
                     lat: coord.lat,
                     lng: coord.lng,
                   },

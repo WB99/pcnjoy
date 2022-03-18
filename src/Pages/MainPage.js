@@ -3,15 +3,13 @@ import Map from "../Components/Map";
 import NavBar from "../Components/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import classes from "./MainPage.module.css";
-import axios from "axios";
-import { Button } from "react-bootstrap";
 
 function MainPage() {
+  const [mapsLoaded, setMapsLoaded] = useState(false)
   const [coord, setCoord] = useState({ lat: 1.3521, lng: 103.8198 });
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [address, setAddress] = useState(null);
-  const [savedPlaces, setsavedPlaces] = useState([])
   const [token, setToken] = useState();
   const [routeData, setRouteData] = useState({});
   const [cleanRouteData, setCleanRouteData] = useState({
@@ -117,6 +115,7 @@ function MainPage() {
     <div className={classes.root}>
       <div className={classes.Map}>
         <Map
+          setMapsLoaded={setMapsLoaded}
           routeLatlngs={routeLatlngs}
           coord={coord}
           markers={markers}
@@ -130,6 +129,7 @@ function MainPage() {
       </div>
       <div className={classes.NavBar}>
         <NavBar
+          mapsLoaded={mapsLoaded}
           setCoord={setCoord}
           markers={markers}
           setMarkers={setMarkers}
