@@ -12,7 +12,7 @@ import length from "../Assets/length.png";
   function Directions(props) {
     
     const listDirs = props.data.directions.map((dir) =>
-        <div>
+        <div className={classes.listWrapper}>
             <p className={classes.dir}>{dir}</p>
             <hr className={classes.rounded}></hr>
         </div>

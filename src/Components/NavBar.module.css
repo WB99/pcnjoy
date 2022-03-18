@@ -1,3 +1,10 @@
+.root{
+  /* overflow: scroll; */
+  /* height: 90vh */
+  height: 100%;
+  position: relative;
+}
+
 .title {
   display: flex;
   justify-content: space-around;

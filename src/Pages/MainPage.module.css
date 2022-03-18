@@ -1,15 +1,16 @@
 .root {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .NavBar {
   position: absolute;
   background-color: white;
   width: 30%;
-  height: 99%;
-  border-radius: 0 20px 20px 0;
-  border: 2px solid black;
+  height: 100%;
+  box-shadow: 1px 0px 20px 1px black;
+  padding: 15px;
+  overflow: hidden;
 }
-
 

@@ -71,7 +71,7 @@ function NavBar(props) {
         <Button variant="secondary"> Add to Saved Routes </Button>
       </div>
 
-      body = <div>
+      body = <div style={{height: "40%"}}>
         <hr className={classes.rounded}></hr>
         <Directions data={props.cleanRouteData}/>
       </div>
@@ -101,7 +101,7 @@ function NavBar(props) {
     return <Navigate to="/login" />;
   } else {
     return (
-      <div>
+      <div className={classes.root}>
         <div className={classes.title}>
           <div>PCNJOY</div>
           <div>
