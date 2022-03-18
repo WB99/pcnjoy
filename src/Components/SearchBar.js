@@ -4,12 +4,16 @@ import {
   ComboboxOption,
   ComboboxPopover,
 } from "@reach/combobox";
-import React from "react";
+import React, { useEffect } from "react";
 import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from "use-places-autocomplete";
 import "@reach/combobox/styles.css";
+import Geocode from "react-geocode";
+
+Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API);
+Geocode.enableDebug();
 
 function SearchBar(props) {
   const {
@@ -25,6 +29,10 @@ function SearchBar(props) {
       componentRestrictions: { country: "sg" },
     },
   });
+  
+  useEffect(() => {
+    setValue("")
+  }, [props.markers])
 
   return (
     <div>
@@ -41,6 +49,7 @@ function SearchBar(props) {
                 let newArray = [...current];
                 newArray[props.id] = {
                   key: `${coord.lat},${coord.lng}`,
+                  address: `${address}`,
                   lat: coord.lat,
                   lng: coord.lng,
                 };
@@ -50,6 +59,7 @@ function SearchBar(props) {
                   ...current,
                   {
                     key: `${coord.lat},${coord.lng}`,
+                    address: `${address}`,
                     lat: coord.lat,
                     lng: coord.lng,
                   },
@@ -67,7 +77,7 @@ function SearchBar(props) {
             setValue(e.target.value);
           }}
           disabled={!ready}
-          placeholder="Enter an Address"
+          placeholder={props.address ? props.address : "Enter an Address"}
         />
         <ComboboxPopover>
           {status === "OK" &&

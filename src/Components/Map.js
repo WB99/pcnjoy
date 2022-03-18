@@ -23,6 +23,8 @@ const options = {
   disableDefaultUI: true,
 };
 
+const markersLimit = 5;
+
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API);
 Geocode.enableDebug();
 
@@ -31,8 +33,6 @@ function Map(props) {
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API,
     libraries,
   });
-  const [selected, setSelected] = useState(null);
-  const [address, setAddress] = useState(null);
   const [check, setCheck] = useState(null);
 
   useEffect(() => {
@@ -40,6 +40,7 @@ function Map(props) {
     if (mapRef.current && props.coord && isMounted) {
       mapRef.current.panTo(props.coord);
     }
+    props.setSelected(null);
     return () => {
       isMounted = false;
     };
@@ -47,7 +48,7 @@ function Map(props) {
 
   const onMapClick = useCallback((event) => {
     try {
-      setSelected(null);
+      props.setSelected(null);
       setCheck(() => ({
         key: `${event.latLng.lat()},${event.latLng.lng()}`,
         lat: event.latLng.lat(),
@@ -64,11 +65,52 @@ function Map(props) {
   }, []);
 
   const addPointToRoute = () => {
-    console.log("AddPointToRoute");
+    props.setMarkers((current) => {
+      if (current.length > 0) {
+        let newArray = [...current];
+        newArray[current.length] = {
+          key: `${props.selected.lat},${props.selected.lng}`,
+          address: `${props.address}`,
+          lat: props.selected.lat,
+          lng: props.selected.lng,
+        };
+        return newArray;
+      } else {
+        return [
+          ...current,
+          {
+            key: `${props.selected.lat},${props.selected.lng}`,
+            address: `${props.address}`,
+            lat: props.selected.lat,
+            lng: props.selected.lng,
+          },
+        ];
+      }
+    });
+    props.setSelected(null);
+    setCheck(null);
   };
 
-  if (loadError) return "Error loading maps";
-  if (!isLoaded) return "Loading Maps";
+  const removePointToRoute = () => {
+    props.setMarkers((current) => {
+      let newArray = [...current];
+      for (var i = 0; i < newArray.length; i++) {
+        if (newArray[i].key === props.selected.key) {
+          newArray.splice(i, 1);
+          break;
+        }
+      }
+      return newArray;
+    });
+    setCheck(props.selected);
+    props.setSelected(null);
+  };
+
+  if (!isLoaded) {
+    return "Loading Maps";
+  } else {
+    props.setMapsLoaded(true);
+  }
 
   return (
     <div>
@@ -85,7 +127,7 @@ function Map(props) {
             key={`${marker.lat},${marker.lng}`}
             position={{ lat: marker.lat, lng: marker.lng }}
             onClick={() => {
-              setSelected(marker);
+              props.setSelected(marker);
             }}
           />
         ))}
@@ -95,48 +137,65 @@ function Map(props) {
             key={`${check.lat}, ${check.lng}`}
             position={{ lat: check.lat, lng: check.lng }}
             onClick={() => {
-              setSelected(check);
+              props.setSelected(check);
             }}
             onRightClick={() => {
               setCheck(null);
-              setSelected(null);
+              props.setSelected(null);
             }}
-            icon={{url:"http://maps.google.com/mapfiles/ms/icons/blue-dot.png"}}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            }}
           />
         ) : null}
 
-        {selected ? (
+        {props.selected ? (
           <InfoWindow
             options={{ pixelOffset: new window.google.maps.Size(-1, -35) }}
-            position={{ lat: selected.lat, lng: selected.lng }}
+            position={{ lat: props.selected.lat, lng: props.selected.lng }}
             onCloseClick={() => {
-              setSelected(null);
-              setAddress(null);
+              props.setSelected(null);
+              props.setAddress(null);
             }}
           >
             <div>
-              {Geocode.fromLatLng(selected.lat, selected.lng).then(
+              {Geocode.fromLatLng(props.selected.lat, props.selected.lng).then(
                 (Response) => {
-                  setAddress(Response.results[0].formatted_address);
+                  props.setAddress(
+                    Response.results[0].formatted_address
+                      .toString()
+                      .replace(/(, )*Singapore( (\d)*)?/, "")
+                  );
                 },
                 (Error) => {
                   console.log(Error);
                 }
               ) ? (
-                <h5>
-                  {address
-                    ? address.toString().replace(/(, )*Singapore( (\d)*)?/, "")
-                    : "Invalid Address"}
-                </h5>
+                <h5>{props.address ? props.address : "Invalid Address"}</h5>
               ) : (
                 <h5>Invalid Address</h5>
               )}
               <p>
-                {parseFloat(selected.lat).toFixed(3)},{" "}
-                {parseFloat(selected.lng).toFixed(3)}
+                {parseFloat(props.selected.lat).toFixed(3)},{" "}
+                {parseFloat(props.selected.lng).toFixed(3)}
               </p>
-              <Button>Add to Saved Place</Button>{" "}
-              <Button onClick={addPointToRoute}>Add Point to Route</Button>
+              {false ? (
+                <Button>Remove from Saved Place</Button>
+              ) : (
+                <Button>Add to Saved Place</Button>
+              )}
+              {props.markers.includes(props.selected) ? (
+                <Button onClick={removePointToRoute}>
+                  Remove Point from Route
+                </Button>
+              ) : (
+                <Button
+                  onClick={addPointToRoute}
+                  disabled={props.markers.length >= markersLimit}
+                >
+                  Add Point to Route
+                </Button>
+              )}
             </div>
           </InfoWindow>
         ) : null}

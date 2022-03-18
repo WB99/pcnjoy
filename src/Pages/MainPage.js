@@ -3,18 +3,15 @@ import Map from "../Components/Map";
 import NavBar from "../Components/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import classes from "./MainPage.module.css";
-import axios from "axios";
-import { Button } from "react-bootstrap";
-
-
 
 function MainPage() {
+  const [mapsLoaded, setMapsLoaded] = useState(false)
   const [coord, setCoord] = useState({ lat: 1.3521, lng: 103.8198 });
   const [markers, setMarkers] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [address, setAddress] = useState(null);
   const [token, setToken] = useState();
-  
   const [routeData, setRouteData] = useState([])
-  
   const [cleanRouteData, setCleanRouteData] = useState(
     {
       duration: null,
@@ -25,24 +22,23 @@ function MainPage() {
   
   const [routeReq, setRouteReq] = useState(false)
   const [isRouted, setRouteState] = useState(false);
-  const [routeLatlngs, setrouteLatlngs] = useState([])
-  
+  const [routeLatlngs, setrouteLatlngs] = useState([]);
+
   useEffect(() => {
-    getToken()
-  }, [])
+    getToken();
+  }, []);
 
   async function getToken() {
     try {
-      const response = await fetch('http://127.0.0.1:9999/getToken', {
-            method: 'POST',
-            headers: {'content-type': 'application/json'}
-        })
-      
-      const data = await response.json()
-      setToken(data.access_token)
+      const response = await fetch("http://127.0.0.1:9999/getToken", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+      });
 
-    } catch(error) {
-      console.log(error)
+      const data = await response.json();
+      setToken(data.access_token);
+    } catch (error) {
+      console.log(error);
     }
   }
   
@@ -159,12 +155,33 @@ function MainPage() {
   return (
     <div className={classes.root}>
       <div className={classes.Map}>
-        <Map routeLatlngs={routeLatlngs} coord={coord} markers={markers} setMarkers={setMarkers} routeData={routeData}/>
+        <Map
+          setMapsLoaded={setMapsLoaded}
+          routeLatlngs={routeLatlngs}
+          coord={coord}
+          markers={markers}
+          setMarkers={setMarkers}
+          selected={selected}
+          setSelected={setSelected}
+          address={address}
+          setAddress={setAddress}
+          routeData={routeData}
+        />
       </div>
       <div className={classes.NavBar}>
-        <NavBar setCoord={setCoord} markers={markers} setMarkers={setMarkers} 
-        setRouteReq={setRouteReq} setRouteState={setRouteState} isRouted={isRouted}
-        cleanRouteData={cleanRouteData} setrouteLatlngs={setrouteLatlngs}/>
+        <NavBar
+          mapsLoaded={mapsLoaded}
+          setCoord={setCoord}
+          markers={markers}
+          setMarkers={setMarkers}
+          address={address}
+          setAddress={setAddress}
+          setRouteReq={setRouteReq}
+          setRouteState={setRouteState}
+          isRouted={isRouted}
+          cleanRouteData={cleanRouteData}
+          setrouteLatlngs={setrouteLatlngs}
+        />
       </div>
     </div>
   );
