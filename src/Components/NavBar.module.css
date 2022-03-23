@@ -18,3 +18,27 @@
 .solid {
   border-top: 3px solid #bbb;
 }
+
+.search {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.SBLabels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding-top: 3%;
+}
+
+.searchBar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.searchBarRemoval {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}

@@ -39,13 +39,14 @@ function Map(props) {
     libraries,
   });
   const [check, setCheck] = useState(null);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
     if (mapRef.current && props.coord && isMounted) {
       mapRef.current.panTo(props.coord);
     }
-    props.setSelected(null);
+    setSelected(null);
     return () => {
       isMounted = false;
     };
@@ -53,11 +54,12 @@ function Map(props) {
 
   const onMapClick = useCallback((event) => {
     try {
-      props.setSelected(null);
+      setSelected(null);
       setCheck(() => ({
         key: `${event.latLng.lat()},${event.latLng.lng()}`,
         lat: event.latLng.lat(),
         lng: event.latLng.lng(),
+        isLandmark: false
       }));
     } catch (error) {
       console.log(error);
@@ -70,54 +72,74 @@ function Map(props) {
   }, []);
 
   const addPointToRoute = () => {
+    props.setRouteState(false);
     props.setMarkers((current) => {
       if (current.length > 0) {
         let newArray = [...current];
         newArray[current.length] = {
-          key: `${props.selected.lat},${props.selected.lng}`,
-          address: (props.selected.isLandmark ? `${props.selected.key}` : `${props.address}`),
-          lat: props.selected.lat,
-          lng: props.selected.lng,
+          key: `${selected.lat},${selected.lng}`,
+          address: (selected.isLandmark ? `${selected.key}` : `${props.address}`),
+          lat: selected.lat,
+          lng: selected.lng,
         };
         return newArray;
       } else {
         return [
           ...current,
           {
-            key: `${props.selected.lat},${props.selected.lng}`,
-            address: (props.selected.isLandmark ? `${props.selected.key}` : `${props.address}`),
-            lat: props.selected.lat,
-            lng: props.selected.lng,
+            key: `${selected.lat},${selected.lng}`,
+            address: (selected.isLandmark ? `${selected.key}` : `${props.address}`),
+            lat: selected.lat,
+            lng: selected.lng,
           },
         ];
       }
     });
-    props.setSelected(null);
+    setSelected(null);
     setCheck(null);
   };
 
-  const removePointToRoute = () => {
+  const removePointFromRoute = () => {
+    props.setRouteState(false);
     props.setMarkers((current) => {
       let newArray = [...current];
       for (var i = 0; i < newArray.length; i++) {
-        if (newArray[i].key === props.selected.key) {
+        if (newArray[i].key === selected.key) {
           newArray.splice(i, 1);
           break;
         }
       }
       return newArray;
     });
-    setCheck(props.selected);
-    props.setSelected(null);
+    setCheck(selected);
+    setSelected(null);
   };
 
-  // check if landmark and set address title
-  // useEffect(() => {
-  //conditionally render infocard address title - set to landmark name if landmark
-    // if (props.selected.isLandmark) {
-    //   props.setAddress(props.selected.key) 
-    // }
-  // }, [props.selected])
+  const addSavedPlace = () => {
+    props.setSavedPlaces((current) => {
+      if (current.length > 0) {
+        let newArray = [...current];
+        newArray[current.length] = selected;
+        return newArray;
+      } else {
+        return [...current, selected];
+      }
+    });
+  };
+
+  const removeSavedPlace = () => {
+    props.setSavedPlaces((current) => {
+      let newArray = [...current];
+      for (var i = 0; i < newArray.length; i++) {
+        if (newArray[i].key === selected.key) {
+          newArray.splice(i, 1);
+          break;
+        }
+      }
+      return newArray;
+    });
+  };
+
 
   if (!isLoaded) {
     return "Loading Maps";
@@ -140,7 +162,7 @@ function Map(props) {
             key={`${marker.lat},${marker.lng}`}
             position={{ lat: marker.lat, lng: marker.lng }}
             onClick={() => {
-              props.setSelected(marker);
+              setSelected(marker);
             }}
           />
         ))}
@@ -153,13 +175,12 @@ function Map(props) {
               url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
             }}
             onClick={() => {
-              props.setSelected({
+              setSelected({
                 key: landmark.name,
                 lat:landmark.lat, 
                 lng:landmark.long, 
                 isLandmark:true
               });
-              // props.setAddress(props.selected.key) 
             }}
           />
         ))) : null}
@@ -172,13 +193,12 @@ function Map(props) {
               url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
             }}
             onClick={() => {
-              props.setSelected({
+              setSelected({
                 key: landmark.name,
                 lat:landmark.lat, 
                 lng:landmark.long, 
                 isLandmark:true
               });
-              // props.setAddress(props.selected.key) 
             }}
           />
         ))) : null}
@@ -188,11 +208,11 @@ function Map(props) {
             key={`${check.lat}, ${check.lng}`}
             position={{ lat: check.lat, lng: check.lng }}
             onClick={() => {
-              props.setSelected(check);
+              setSelected(check);
             }}
             onRightClick={() => {
               setCheck(null);
-              props.setSelected(null);
+              setSelected(null);
             }}
             icon={{
               url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
@@ -200,19 +220,19 @@ function Map(props) {
           />
         ) : null}
 
-        {props.selected ? (
+        {selected ? (
           <InfoWindow
             options={{ pixelOffset: new window.google.maps.Size(-1, -35) }}
-            position={{ lat: props.selected.lat, lng: props.selected.lng }}
+            position={{ lat: selected.lat, lng: selected.lng }}
             onCloseClick={() => {
-              props.setSelected(null);
+              setSelected(null);
               props.setAddress(null);
             }}
           >
             <div>
               <div>
-                { props.selected.isLandmark ? (<h5>{props.selected.key}</h5>) : (
-                    Geocode.fromLatLng(props.selected.lat, props.selected.lng).then(
+                { selected.isLandmark ? (<h5>{selected.key}</h5>) : (
+                    Geocode.fromLatLng(selected.lat, selected.lng).then(
                       (Response) => {
                           props.setAddress(
                           Response.results[0].formatted_address
@@ -232,16 +252,18 @@ function Map(props) {
                 }
               </div>
               <p>
-                {parseFloat(props.selected.lat).toFixed(3)},{" "}
-                {parseFloat(props.selected.lng).toFixed(3)}
+                {parseFloat(selected.lat).toFixed(3)},{" "}
+                {parseFloat(selected.lng).toFixed(3)}
               </p>
-              {false ? (
-                <Button>Remove from Saved Place</Button>
+              {props.savedPlaces.includes(selected) ? (
+                <Button onClick={removeSavedPlace}>
+                  Remove from Saved Place
+                </Button>
               ) : (
-                <Button>Add to Saved Place</Button>
+                <Button onClick={addSavedPlace}>Add to Saved Place</Button>
               )}
-              {props.markers.includes(props.selected) ? (
-                <Button onClick={removePointToRoute}>
+              {props.markers.includes(selected) ? (
+                <Button onClick={removePointFromRoute}>
                   Remove Point from Route
                 </Button>
               ) : (

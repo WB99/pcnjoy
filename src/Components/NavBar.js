@@ -27,6 +27,8 @@ function NavBar(props) {
       key={0}
     />,
   ]);
+  const [SBLabels, setSBLabels] = useState([]);
+  const [searchBarRemoval, setSearchBarRemoval] = useState([]);
 
   const handleSignOut = () => {
     signOut(auth)
@@ -46,6 +48,7 @@ function NavBar(props) {
     }
   });
 
+  // when markers change -> SearchBars changes
   useEffect(() => {
     setSearchBar([]);
     if (props.markers.length > 0) {
@@ -93,22 +96,46 @@ function NavBar(props) {
     }
   }, [props.markers]);
 
+  // when SearchBar changes -> SBLabels and SearchBarRemoval changes
   useEffect(() => {
-    if (props.mapsLoaded) {
-      setSearchBar([
-        <SearchBar
-          setCoord={props.setCoord}
-          markers={props.markers}
-          setMarkers={props.setMarkers}
-          address={null}
-          id={0}
-          key={0}
-        />,
-      ]);
-    } else {
-      setSearchBar([])
+    setSBLabels([]);
+    setSearchBarRemoval([]);
+    if (searchBar.length > 0) {
+      searchBar.forEach(() => {
+        setSBLabels((current) => {
+          if (current.length === 0) {
+            return [...current, <p>Start</p>];
+          } else if (current.length === searchBar.length - 1) {
+            let newArray = [...current];
+            newArray[current.length] = <p>End</p>;
+            return newArray;
+          } else {
+            let newArray = [...current];
+            newArray[current.length] = <p>Point</p>;
+            return newArray;
+          }
+        });
+        setSearchBarRemoval((current) => {
+          if (current.length > 0) {
+            let newArray = [...current];
+            newArray[current.length] = (
+              <Button id={current.length} onClick={searchBarRemovalClicked}>
+                Remove
+              </Button>
+            );
+            return newArray;
+          } else {
+            return [
+              ...current,
+              <Button id={0} onClick={searchBarRemovalClicked}>
+                Remove
+              </Button>,
+            ];
+          }
+        });
+      });
     }
-  }, [props.mapsLoaded])
+  }, [searchBar, props.isRouted]);
 
   const createSearchBar = () => {
     if (searchBar.length < searchBarLimit) {
@@ -143,13 +170,41 @@ function NavBar(props) {
     }
   };
 
+  const searchBarRemovalClicked = (e) => {
+    props.setRouteState(false);
+    props.setMarkers((current) => {
+      let newArray = [...current];
+      newArray.splice(e.target.id, 1);
+      return newArray;
+    });
+  };
+
+  // when map loaded state change -> SearchBars changes
+  useEffect(() => {
+    if (props.mapsLoaded) {
+      setSearchBar([]);
+      setSearchBar([
+        <SearchBar
+          setCoord={props.setCoord}
+          markers={props.markers}
+          setMarkers={props.setMarkers}
+          address={null}
+          id={0}
+          key={0}
+        />,
+      ]);
+    } else {
+      setSearchBar([]);
+    }
+  }, [props.mapsLoaded]);
+
   function routeHandler(showRoute) {
     if (showRoute) {
       props.setRouteReq(true);
       props.setRouteState(true);
     } else {
       props.setRouteState(false);
-      props.setrouteLatlngs([]);
+      // props.setrouteLatlngs([]);
     }
   }
 
@@ -166,7 +221,7 @@ function NavBar(props) {
     );
 
     body = (
-      <div style={{height: "40%"}}>
+      <div style={{ height: "40%" }}>
         <hr className={classes.rounded}></hr>
         <Directions data={props.cleanRouteData} />
       </div>
@@ -199,7 +254,7 @@ function NavBar(props) {
           monumentCheck={props.monumentCheck}
         />
         <hr className={classes.solid}></hr>
-        <SavedPlace />
+        <SavedPlace savedPlaces={props.savedPlaces} />
         <hr className={classes.solid}></hr>
         <SavedRoutes />
       </div>
@@ -219,8 +274,11 @@ function NavBar(props) {
           </div>
         </div>
         <hr className={classes.solid}></hr>
-
-        {searchBar}
+        <div className={classes.search}>
+          <div className={classes.SBLabels}>{SBLabels}</div>
+          <div className={classes.searchBar}>{searchBar}</div>
+          <div className={classes.searchBarRemoval}>{searchBarRemoval}</div>
+        </div>
         {buttons}
         {body}
       </div>

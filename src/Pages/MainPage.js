@@ -5,28 +5,24 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import classes from "./MainPage.module.css";
 
 function MainPage() {
-  const [mapsLoaded, setMapsLoaded] = useState(false)
+  const [mapsLoaded, setMapsLoaded] = useState(null);
   const [coord, setCoord] = useState({ lat: 1.3521, lng: 103.8198 });
   const [markers, setMarkers] = useState([]);
-  const [selected, setSelected] = useState(null);
   const [address, setAddress] = useState(null);
   const [token, setToken] = useState();
-  const [routeData, setRouteData] = useState([])
-  const [cleanRouteData, setCleanRouteData] = useState(
-    {
-      duration: null,
-      distance: null,
-      via: null,
-      directions: []
-    })
-  
-  const [routeReq, setRouteReq] = useState(false)
+  const [routeData, setRouteData] = useState([]);
+  const [cleanRouteData, setCleanRouteData] = useState({
+    duration: null,
+    distance: null,
+    via: null,
+    directions: [],
+  });
+  const [routeReq, setRouteReq] = useState(false);
   const [isRouted, setRouteState] = useState(false);
   const [routeLatlngs, setrouteLatlngs] = useState([]);
-  
   const [histSiteCheck, setHistSite] = useState(false);
   const [monumentCheck, setMonument] = useState(false);
-
+  const [savedPlaces, setSavedPlaces] = useState([]);
 
   useEffect(() => {
     getToken();
@@ -45,17 +41,24 @@ function MainPage() {
       console.log(error);
     }
   }
-  
+
+  // Remove route when isRouted false
+  useEffect(() => {
+    if (!isRouted) {
+      setrouteLatlngs([]);
+    }
+  }, [isRouted]);
+
   useEffect(() => {
     const getAllRoutes = async () => {
-      let routes = []
-      for(let i = 0; i < (markers.length-1); i++) {
-        const route = await getRoute(markers[i].key, markers[i+1].key);
-        routes = [...routes, route]
+      let routes = [];
+      for (let i = 0; i < markers.length - 1; i++) {
+        const route = await getRoute(markers[i].key, markers[i + 1].key);
+        routes = [...routes, route];
       }
-      setRouteData(routes) // set route data only once
-      setRouteReq(false)  // reset routereq to false
-    }
+      setRouteData(routes); // set route data only once
+      setRouteReq(false); // reset routereq to false
+    };
 
     async function getRoute(start, end) {
       try {
@@ -70,8 +73,7 @@ function MainPage() {
           }),
         });
         const data = await response.json();
-        return data
-        
+        return data;
       } catch (error) {
         console.log(error);
       }
@@ -79,81 +81,81 @@ function MainPage() {
     }
 
     // Action
-    if (routeReq) { // check to ensure getAllRoutes() only called when routeReq true
-      getAllRoutes()
+    if (routeReq) {
+      // check to ensure getAllRoutes() only called when routeReq true
+      getAllRoutes();
     }
-  }, [routeReq])
+  }, [routeReq]);
 
   useEffect(() => {
     const plot = async () => {
       if (routeData.length > 0) {
-        await plotRoute()
+        await plotRoute();
       }
-    }
-    plot()
+    };
+    plot();
 
     async function plotRoute() {
       // data cleaning
       var timeSeconds = 0;
       var dist = 0;
       var viaArray = [];
-      var directions = []
+      var directions = [];
 
-      for(let k = 0; k < routeData.length; k++){
-        timeSeconds += routeData[k].route_summary.total_time;        
+      for (let k = 0; k < routeData.length; k++) {
+        timeSeconds += routeData[k].route_summary.total_time;
         dist += routeData[k].route_summary.total_distance;
         viaArray = viaArray.concat(routeData[k].route_name);
         routeData[k].route_instructions.forEach((item) => {
-          directions.push(item[9])
-        })
+          directions.push(item[9]);
+        });
       }
-      
-      const timeHM = (timeSeconds >= 3600 ? 
-        Math.floor(timeSeconds/3600) + "hr " + Math.floor(timeSeconds%3600/60) + "min" :
-        Math.floor(timeSeconds/60) + "min"
-      )
-      const distKm = Math.round(dist/1000) + "km";
-      const via = viaArray.join(", ")
+
+      const timeHM =
+        timeSeconds >= 3600
+          ? Math.floor(timeSeconds / 3600) +
+            "hr " +
+            Math.floor((timeSeconds % 3600) / 60) +
+            "min"
+          : Math.floor(timeSeconds / 60) + "min";
+      const distKm = Math.round(dist / 1000) + "km";
+      const via = viaArray.join(", ");
 
       setCleanRouteData({
         duration: timeHM,
         distance: distKm,
         via: via,
-        directions: directions
-      })
-  
+        directions: directions,
+      });
+
       // decode polyline
       var latlngs = [];
       // console.log("route data length ", routeData.length)
-      for(let j = 0; j < routeData.length; j++){
+      for (let j = 0; j < routeData.length; j++) {
         // console.log("INSIDELOOP: ")
-  
+
         // console.log("routeGeometry: ", routeData[j].route_geometry)
         var encoded = routeData[j].route_geometry;
         var polyUtil = require("polyline-encoded");
         var latlngArray = polyUtil.decode(encoded);
-        
+
         // console.log("LATLNG ARRAY: ", latlngArray)
-  
+
         latlngArray.forEach((item) => {
           var output = {
             lat: item[0],
-            lng: item[1]
-          }
-          latlngs.push(output)
-        })
+            lng: item[1],
+          };
+          latlngs.push(output);
+        });
       }
-  
+
       // console.log("LATLNG ARRAY: ", latlngs)
       // setRouteReq(false)
-      setrouteLatlngs(latlngs)
+      setrouteLatlngs(latlngs);
     }
     // oneMap Routing Api
-  }, [routeData])
-
-  // console.log("route req: ", routeReq)
-  // console.log("ROUTE DATA HERE: ", routeData)
-  // console.log("MARKERSSS: ", markers)
+  }, [routeData]);
   // console.log("LATLONGSS: ", routeLatlngs)
 
   return (
@@ -161,12 +163,11 @@ function MainPage() {
       <div className={classes.Map}>
         <Map
           setMapsLoaded={setMapsLoaded}
+          setRouteState={setRouteState}
           routeLatlngs={routeLatlngs}
           coord={coord}
           markers={markers}
           setMarkers={setMarkers}
-          selected={selected}
-          setSelected={setSelected}
           address={address}
           setAddress={setAddress}
           routeData={routeData}
@@ -174,6 +175,8 @@ function MainPage() {
           histSiteCheck={histSiteCheck}
           setMonument={setMonument}
           monumentCheck={monumentCheck}
+          savedPlaces={savedPlaces}
+          setSavedPlaces={setSavedPlaces}
         />
       </div>
       <div className={classes.NavBar}>
@@ -193,6 +196,7 @@ function MainPage() {
           histSiteCheck={histSiteCheck}
           setMonument={setMonument}
           monumentCheck={monumentCheck}
+          savedPlaces={savedPlaces}
         />
       </div>
     </div>
