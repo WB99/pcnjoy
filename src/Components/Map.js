@@ -10,6 +10,11 @@ import Geocode from "react-geocode";
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import historicSites from "../Assets/historic-sites.json";
+import monuments from "../Assets/monuments.json";
+
+
+
 const libraries = ["places"];
 const mapContainerStyle = {
   width: "100vw",
@@ -70,7 +75,7 @@ function Map(props) {
         let newArray = [...current];
         newArray[current.length] = {
           key: `${props.selected.lat},${props.selected.lng}`,
-          address: `${props.address}`,
+          address: (props.selected.isLandmark ? `${props.selected.key}` : `${props.address}`),
           lat: props.selected.lat,
           lng: props.selected.lng,
         };
@@ -80,7 +85,7 @@ function Map(props) {
           ...current,
           {
             key: `${props.selected.lat},${props.selected.lng}`,
-            address: `${props.address}`,
+            address: (props.selected.isLandmark ? `${props.selected.key}` : `${props.address}`),
             lat: props.selected.lat,
             lng: props.selected.lng,
           },
@@ -105,6 +110,14 @@ function Map(props) {
     setCheck(props.selected);
     props.setSelected(null);
   };
+
+  // check if landmark and set address title
+  // useEffect(() => {
+  //conditionally render infocard address title - set to landmark name if landmark
+    // if (props.selected.isLandmark) {
+    //   props.setAddress(props.selected.key) 
+    // }
+  // }, [props.selected])
 
   if (!isLoaded) {
     return "Loading Maps";
@@ -131,6 +144,44 @@ function Map(props) {
             }}
           />
         ))}
+
+        {props.histSiteCheck ? (historicSites.map(landmark => (
+          <Marker
+            key = {landmark.name}
+            position = {{lat:landmark.lat, lng:landmark.long}}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            }}
+            onClick={() => {
+              props.setSelected({
+                key: landmark.name,
+                lat:landmark.lat, 
+                lng:landmark.long, 
+                isLandmark:true
+              });
+              // props.setAddress(props.selected.key) 
+            }}
+          />
+        ))) : null}
+
+        {props.monumentCheck ? (monuments.map(landmark => (
+          <Marker
+            key = {landmark.name}
+            position = {{lat:landmark.lat, lng:landmark.long}}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            }}
+            onClick={() => {
+              props.setSelected({
+                key: landmark.name,
+                lat:landmark.lat, 
+                lng:landmark.long, 
+                isLandmark:true
+              });
+              // props.setAddress(props.selected.key) 
+            }}
+          />
+        ))) : null}
 
         {check ? (
           <Marker
@@ -159,22 +210,27 @@ function Map(props) {
             }}
           >
             <div>
-              {Geocode.fromLatLng(props.selected.lat, props.selected.lng).then(
-                (Response) => {
-                  props.setAddress(
-                    Response.results[0].formatted_address
-                      .toString()
-                      .replace(/(, )*Singapore( (\d)*)?/, "")
-                  );
-                },
-                (Error) => {
-                  console.log(Error);
+              <div>
+                { props.selected.isLandmark ? (<h5>{props.selected.key}</h5>) : (
+                    Geocode.fromLatLng(props.selected.lat, props.selected.lng).then(
+                      (Response) => {
+                          props.setAddress(
+                          Response.results[0].formatted_address
+                            .toString()
+                            .replace(/(, )*Singapore( (\d)*)?/, "")
+                        );
+                      },
+                      (Error) => {
+                        console.log(Error);
+                      }
+                    ) ? (
+                      <h5>{props.address ? props.address : "Invalid Address"}</h5>
+                    ) : (
+                      <h5>Invalid Address</h5>
+                    )
+                )
                 }
-              ) ? (
-                <h5>{props.address ? props.address : "Invalid Address"}</h5>
-              ) : (
-                <h5>Invalid Address</h5>
-              )}
+              </div>
               <p>
                 {parseFloat(props.selected.lat).toFixed(3)},{" "}
                 {parseFloat(props.selected.lng).toFixed(3)}

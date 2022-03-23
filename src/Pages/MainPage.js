@@ -23,6 +23,10 @@ function MainPage() {
   const [routeReq, setRouteReq] = useState(false)
   const [isRouted, setRouteState] = useState(false);
   const [routeLatlngs, setrouteLatlngs] = useState([]);
+  
+  const [histSiteCheck, setHistSite] = useState(false);
+  const [monumentCheck, setMonument] = useState(false);
+
 
   useEffect(() => {
     getToken();
@@ -147,9 +151,9 @@ function MainPage() {
     // oneMap Routing Api
   }, [routeData])
 
-  console.log("route req: ", routeReq)
-  console.log("ROUTE DATA HERE: ", routeData)
-  console.log("MARKERSSS: ", markers)
+  // console.log("route req: ", routeReq)
+  // console.log("ROUTE DATA HERE: ", routeData)
+  // console.log("MARKERSSS: ", markers)
   // console.log("LATLONGSS: ", routeLatlngs)
 
   return (
@@ -166,6 +170,10 @@ function MainPage() {
           address={address}
           setAddress={setAddress}
           routeData={routeData}
+          setHistSite={setHistSite}
+          histSiteCheck={histSiteCheck}
+          setMonument={setMonument}
+          monumentCheck={monumentCheck}
         />
       </div>
       <div className={classes.NavBar}>
@@ -181,6 +189,10 @@ function MainPage() {
           isRouted={isRouted}
           cleanRouteData={cleanRouteData}
           setrouteLatlngs={setrouteLatlngs}
+          setHistSite={setHistSite}
+          histSiteCheck={histSiteCheck}
+          setMonument={setMonument}
+          monumentCheck={monumentCheck}
         />
       </div>
     </div>

@@ -192,7 +192,12 @@ function NavBar(props) {
     body = (
       <div>
         <hr className={classes.rounded}></hr>
-        <Landmarks />
+        <Landmarks 
+          setHistSite={props.setHistSite} 
+          setMonument={props.setMonument}
+          histSiteCheck={props.histSiteCheck}
+          monumentCheck={props.monumentCheck}
+        />
         <hr className={classes.solid}></hr>
         <SavedPlace />
         <hr className={classes.solid}></hr>
