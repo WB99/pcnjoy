@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 function SavedPlace(props) {
-  const [checked, setChecked] = React.useState([]);
+  const [checked, setChecked] = useState([]);
 
   useEffect(() => {
     
@@ -31,6 +31,11 @@ function SavedPlace(props) {
     <div>
       <div>SavedPlace</div>
       <div>
+        <div>
+          {props.savedPlaces.map(({ id, name }) => (
+            <div key={id}>{name}</div>
+          ))}
+        </div>
         <Checkbox label="My Value" value={checked} onChange={handleChange} id={0}/>
         <p>Is "My Value" checked? {checked.toString()}</p>
       </div>

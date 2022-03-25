@@ -9,6 +9,8 @@ import {
 import Geocode from "react-geocode";
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { app, auth, db } from "../Firebase/firebase-config";
+import { collection, doc, setDoc, getDoc, addDoc, deleteDoc } from "firebase/firestore";
 
 import historicSites from "../Assets/historic-sites.json";
 import monuments from "../Assets/monuments.json";
@@ -40,6 +42,8 @@ function Map(props) {
   });
   const [check, setCheck] = useState(null);
   const [selected, setSelected] = useState(null);
+  // For backend
+  const savedPlacesRef = collection(db, "places");
 
   useEffect(() => {
     let isMounted = true;
@@ -78,7 +82,7 @@ function Map(props) {
         let newArray = [...current];
         newArray[current.length] = {
           key: `${selected.lat},${selected.lng}`,
-          address: (selected.isLandmark ? `${selected.key}` : `${props.address}`),
+          address: ((selected.isLandmark || selected.isSaved) ? `${selected.key}` : `${props.address}`),
           lat: selected.lat,
           lng: selected.lng,
         };
@@ -88,7 +92,7 @@ function Map(props) {
           ...current,
           {
             key: `${selected.lat},${selected.lng}`,
-            address: (selected.isLandmark ? `${selected.key}` : `${props.address}`),
+            address: ((selected.isLandmark || selected.isSaved) ? `${selected.key}` : `${props.address}`),
             lat: selected.lat,
             lng: selected.lng,
           },
@@ -111,35 +115,44 @@ function Map(props) {
       }
       return newArray;
     });
-    setCheck(selected);
+    // setCheck(selected);
     setSelected(null);
+    setCheck(null);
   };
 
-  const addSavedPlace = () => {
-    props.setSavedPlaces((current) => {
-      if (current.length > 0) {
-        let newArray = [...current];
-        newArray[current.length] = selected;
-        return newArray;
-      } else {
-        return [...current, selected];
-      }
-    });
+  const [count,setCount] = useState(0);
+  const addSavedPlace = async () => {
+    await addDoc(savedPlacesRef, {
+      name: "place"+count,
+      lat: selected.lat,
+      lng: selected.lng,
+      userId: props.userId
+    })
+    setCount(count+1)
+    setSelected(null);
+    setCheck(null);
+    props.setSPisChanged((prev)=>(!prev));
   };
 
-  const removeSavedPlace = () => {
-    props.setSavedPlaces((current) => {
-      let newArray = [...current];
-      for (var i = 0; i < newArray.length; i++) {
-        if (newArray[i].key === selected.key) {
-          newArray.splice(i, 1);
-          break;
-        }
-      }
-      return newArray;
-    });
+  const removeSavedPlace = async () => {
+    // props.setSavedPlaces((current) => {
+    //   let newArray = [...current];
+    //   for (var i = 0; i < newArray.length; i++) {
+    //     if (newArray[i].key === selected.key) {
+    //       newArray.splice(i, 1);
+    //       break;
+    //     }
+    //   }
+    //   return newArray;
+    // });
+    const placeDoc = doc(db, "places", selected.id)
+    await deleteDoc(placeDoc)
+    setSelected(null);
+    setCheck(null);
+    props.setSPisChanged((prev)=>(!prev));
   };
 
+  console.log("MARKERS CHECK: ", props.markers)
 
   if (!isLoaded) {
     return "Loading Maps";
@@ -147,6 +160,7 @@ function Map(props) {
     props.setMapsLoaded(true);
   }
 
+    
   return (
     <div>
       <GoogleMap
@@ -202,6 +216,25 @@ function Map(props) {
             }}
           />
         ))) : null}
+        
+        { props.displaySP.map(place => (
+          <Marker
+            key = {place.name}
+            position = {{lat:place.lat, lng:place.lng}}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
+            }}
+            onClick={() => {
+              setSelected({
+                key: place.name,
+                lat:place.lat, 
+                lng:place.lng, 
+                isSaved:true,
+                id: place.id
+              });
+            }}
+          />
+        ))}
 
         {check ? (
           <Marker
@@ -231,7 +264,7 @@ function Map(props) {
           >
             <div>
               <div>
-                { selected.isLandmark ? (<h5>{selected.key}</h5>) : (
+                { (selected.isLandmark || selected.isSaved) ? (<h5>{selected.key}</h5>) : (
                     Geocode.fromLatLng(selected.lat, selected.lng).then(
                       (Response) => {
                           props.setAddress(
@@ -255,7 +288,7 @@ function Map(props) {
                 {parseFloat(selected.lat).toFixed(3)},{" "}
                 {parseFloat(selected.lng).toFixed(3)}
               </p>
-              {props.savedPlaces.includes(selected) ? (
+              {selected.isSaved ? (  // selected.isSaved
                 <Button onClick={removeSavedPlace}>
                   Remove from Saved Place
                 </Button>
