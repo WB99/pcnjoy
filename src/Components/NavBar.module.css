@@ -10,15 +10,6 @@
   justify-content: space-around;
 }
 
-.rounded {
-  border-top: 8px solid #bbb;
-  border-radius: 5px;
-}
-
-.solid {
-  border-top: 3px solid #bbb;
-}
-
 .search {
   display: flex;
   justify-content: flex-start;

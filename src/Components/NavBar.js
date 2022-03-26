@@ -3,7 +3,7 @@ import SearchBar from "./SearchBar";
 import Landmarks from "./Landmarks";
 import SavedPlace from "./SavedPlace";
 import SavedRoutes from "./SavedRoutes";
-import { Button } from "react-bootstrap";
+import { Button, CloseButton } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import { auth } from "../Firebase/firebase-config";
@@ -104,14 +104,14 @@ function NavBar(props) {
       searchBar.forEach(() => {
         setSBLabels((current) => {
           if (current.length === 0) {
-            return [...current, <p>Start</p>];
+            return [...current, <p key={0}>Start</p>];
           } else if (current.length === searchBar.length - 1) {
             let newArray = [...current];
-            newArray[current.length] = <p>End</p>;
+            newArray[current.length] = <p key={current.length}>End</p>;
             return newArray;
           } else {
             let newArray = [...current];
-            newArray[current.length] = <p>Point</p>;
+            newArray[current.length] = <p key={current.length}>Point</p>;
             return newArray;
           }
         });
@@ -119,17 +119,16 @@ function NavBar(props) {
           if (current.length > 0) {
             let newArray = [...current];
             newArray[current.length] = (
-              <Button id={current.length} onClick={searchBarRemovalClicked}>
-                Remove
-              </Button>
+              <CloseButton
+                id={current.length}
+                onClick={searchBarRemovalClicked}
+              />
             );
             return newArray;
           } else {
             return [
               ...current,
-              <Button id={0} onClick={searchBarRemovalClicked}>
-                Remove
-              </Button>,
+              <CloseButton id={0} onClick={searchBarRemovalClicked} disabled={props.markers.length === 0}/>,
             ];
           }
         });
@@ -246,16 +245,13 @@ function NavBar(props) {
 
     body = (
       <div>
-        <hr className={classes.rounded}></hr>
-        <Landmarks 
-          setHistSite={props.setHistSite} 
+        <Landmarks
+          setHistSite={props.setHistSite}
           setMonument={props.setMonument}
           histSiteCheck={props.histSiteCheck}
           monumentCheck={props.monumentCheck}
         />
-        <hr className={classes.solid}></hr>
         <SavedPlace savedPlaces={props.savedPlaces} />
-        <hr className={classes.solid}></hr>
         <SavedRoutes />
       </div>
     );
