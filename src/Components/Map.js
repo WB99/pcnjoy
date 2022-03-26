@@ -9,6 +9,15 @@ import {
 import Geocode from "react-geocode";
 import { Button, Modal, FloatingLabel, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { app, auth, db } from "../Firebase/firebase-config";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  addDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
 import historicSites from "../Assets/historic-sites.json";
 import monuments from "../Assets/monuments.json";
@@ -39,6 +48,9 @@ function Map(props) {
   const [check, setCheck] = useState(null);
   const [selected, setSelected] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  // For backend
+  const savedPlacesRef = collection(db, "places");
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -77,7 +89,10 @@ function Map(props) {
         let newArray = [...current];
         newArray[current.length] = {
           key: `${selected.lat},${selected.lng}`,
-          address: selected.isLandmark ? `${selected.key}` : `${props.address}`,
+          address:
+            selected.isLandmark || selected.isSaved
+              ? `${selected.key}`
+              : `${props.address}`,
           lat: selected.lat,
           lng: selected.lng,
         };
@@ -87,9 +102,10 @@ function Map(props) {
           ...current,
           {
             key: `${selected.lat},${selected.lng}`,
-            address: selected.isLandmark
-              ? `${selected.key}`
-              : `${props.address}`,
+            address:
+              selected.isLandmark || selected.isSaved
+                ? `${selected.key}`
+                : `${props.address}`,
             lat: selected.lat,
             lng: selected.lng,
           },
@@ -112,11 +128,12 @@ function Map(props) {
       }
       return newArray;
     });
-    setCheck(selected);
+    // setCheck(selected);
     setSelected(null);
+    setCheck(null);
   };
 
-  const addSavedPlace = () => {
+  const addSavedPlace = async () => {
     setShowModal(false);
     props.setSavedPlaces((current) => {
       if (current.length > 0) {
@@ -127,12 +144,21 @@ function Map(props) {
         return [...current, selected];
       }
     });
-
+    await addDoc(savedPlacesRef, {
+      name: "place" + count,
+      lat: selected.lat,
+      lng: selected.lng,
+      userId: props.userId,
+    });
+    setCount(count + 1);
+    setSelected(null);
+    setCheck(null);
+    props.setSPisChanged((prev) => !prev);
   };
 
   const handleClose = () => setShowModal(false);
 
-  const removeSavedPlace = () => {
+  const removeSavedPlace = async () => {
     props.setSavedPlaces((current) => {
       let newArray = [...current];
       for (var i = 0; i < newArray.length; i++) {
@@ -143,8 +169,14 @@ function Map(props) {
       }
       return newArray;
     });
-    
+    const placeDoc = doc(db, "places", selected.id);
+    await deleteDoc(placeDoc);
+    setSelected(null);
+    setCheck(null);
+    props.setSPisChanged((prev) => !prev);
   };
+
+  console.log("MARKERS CHECK: ", props.markers);
 
   if (!isLoaded) {
     return "Loading Maps";
@@ -212,6 +244,25 @@ function Map(props) {
             ))
           : null}
 
+        {props.displaySP.map((place) => (
+          <Marker
+            key={place.name}
+            position={{ lat: place.lat, lng: place.lng }}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
+            }}
+            onClick={() => {
+              setSelected({
+                key: place.name,
+                lat: place.lat,
+                lng: place.lng,
+                isSaved: true,
+                id: place.id,
+              });
+            }}
+          />
+        ))}
+
         {check ? (
           <Marker
             key={`${check.lat}, ${check.lng}`}
@@ -240,7 +291,7 @@ function Map(props) {
           >
             <div>
               <div>
-                {selected.isLandmark ? (
+                {selected.isLandmark || selected.isSaved ? (
                   <h5>{selected.key}</h5>
                 ) : Geocode.fromLatLng(selected.lat, selected.lng).then(
                     (Response) => {
@@ -263,12 +314,14 @@ function Map(props) {
                 {parseFloat(selected.lat).toFixed(3)},{" "}
                 {parseFloat(selected.lng).toFixed(3)}
               </p>
-              {props.savedPlaces.includes(selected) ? (
+              {selected.isSaved ? ( // selected.isSaved
                 <Button onClick={removeSavedPlace}>
                   Remove from Saved Place
                 </Button>
               ) : (
-                <Button onClick={() => setShowModal(true)}>Add to Saved Place</Button>
+                <Button onClick={() => setShowModal(true)}>
+                  Add to Saved Place
+                </Button>
               )}
               {props.markers.includes(selected) ? (
                 <Button onClick={removePointFromRoute}>
@@ -314,14 +367,19 @@ function Map(props) {
                 label="Enter a name for your saved place"
                 className="mb-3"
               >
-                <Form.Control type="text" placeholder="Enter a name for your saved place" />
+                <Form.Control
+                  type="text"
+                  placeholder="Enter a name for your saved place"
+                />
               </FloatingLabel>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={handleClose}>
                 Close
               </Button>
-              <Button variant="primary" onClick={addSavedPlace}>Confirm</Button>
+              <Button variant="primary" onClick={addSavedPlace}>
+                Confirm
+              </Button>
             </Modal.Footer>
           </Modal>
         ) : null}

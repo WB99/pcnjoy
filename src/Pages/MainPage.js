@@ -3,6 +3,17 @@ import Map from "../Components/Map";
 import NavBar from "../Components/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import classes from "./MainPage.module.css";
+import { app, auth, db } from "../Firebase/firebase-config";
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  addDoc, 
+  getDocs,
+  query,
+  where 
+} from "firebase/firestore";
 
 function MainPage() {
   const [mapsLoaded, setMapsLoaded] = useState(null);
@@ -17,16 +28,79 @@ function MainPage() {
     via: null,
     directions: [],
   });
+  const [userId, setUserId] = useState("");
+  
   const [routeReq, setRouteReq] = useState(false);
   const [isRouted, setRouteState] = useState(false);
   const [routeLatlngs, setrouteLatlngs] = useState([]);
+  
   const [histSiteCheck, setHistSite] = useState(false);
   const [monumentCheck, setMonument] = useState(false);
+  
   const [savedPlaces, setSavedPlaces] = useState([]);
+  const [SPisChanged, setSPisChanged] = useState(false);
+  const [displaySP, setDisplaySP] = useState([]);
+  
+  const [savedRoutes, setSavedRoutes] = useState([]);
+  const [SRisChanged, setSRisChanged] = useState(false);
+  const [displaySR, setDisplaySR] = useState({});
+
+
+  const savedPlacesRef = collection(db, "places");
+  const savedRoutesRef = collection(db, "routes");
+
+
 
   useEffect(() => {
     getToken();
+    const user = auth.currentUser;
+    setUserId(user.uid);
   }, []);
+  // console.log("USER id: ", userId)
+  
+  useEffect(() => {
+    if(userId !== ""){
+      getSavedPlaces()
+    }
+  }, [userId, SPisChanged])
+  
+  
+  useEffect(()=>{
+    setDisplaySP(savedPlaces); // FOR NOW: all saved places are displayed
+    // toggle logic do in savedplaces.js
+    console.log("Saved Places HERE", savedPlaces);
+  }, [savedPlaces])
+  
+  useEffect(() => {
+    if(userId !== ""){
+      getSavedRoutes()
+    }
+  }, [userId, SRisChanged])
+
+  useEffect(()=>{
+    // setRouteLatLong
+    // setRouteState
+    // setMarkers
+  }, [displaySR])
+
+  async function getSavedPlaces() {
+    const q = query(savedPlacesRef, where("userId", "==", userId))
+    const places = await getDocs(q);
+    const placesData = places.docs.map(
+      (doc) => ({...doc.data(), id: doc.id}) 
+    )
+    setSavedPlaces(placesData);
+  }
+
+  async function getSavedRoutes() {
+    const q = query(savedRoutesRef, where("userId", "==", userId))
+    const routes = await getDocs(q);
+    const routesData = routes.docs.map(
+      (doc) => ({...doc.data(), id: doc.id}) 
+    )
+    setSavedRoutes(routesData);
+  }
+  
 
   async function getToken() {
     try {
@@ -177,6 +251,12 @@ function MainPage() {
           monumentCheck={monumentCheck}
           savedPlaces={savedPlaces}
           setSavedPlaces={setSavedPlaces}
+          setUserId={setUserId}
+          userId={userId}
+          setSPisChanged={setSPisChanged}
+          SPisChanged={SPisChanged}
+          displaySP={displaySP}
+          setDisplaySP={setDisplaySP}
         />
       </div>
       <div className={classes.NavBar}>
@@ -191,12 +271,24 @@ function MainPage() {
           setRouteState={setRouteState}
           isRouted={isRouted}
           cleanRouteData={cleanRouteData}
+          routeLatlngs={routeLatlngs}
           setrouteLatlngs={setrouteLatlngs}
           setHistSite={setHistSite}
           histSiteCheck={histSiteCheck}
           setMonument={setMonument}
           monumentCheck={monumentCheck}
           savedPlaces={savedPlaces}
+          setUserId={setUserId}
+          userId={userId}
+          setSPisChanged={setSPisChanged}
+          SPisChanged={SPisChanged}
+          displaySP={displaySP}
+          setDisplaySP={setDisplaySP}
+          setSRisChanged={setSRisChanged}
+          SRisChanged={SRisChanged}
+          savedRoutes={savedRoutes}
+          setDisplaySR={setDisplaySR}
+          displaySR={displaySR}
         />
       </div>
     </div>

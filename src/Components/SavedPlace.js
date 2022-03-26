@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function SavedPlace(props) {
   const [booleanArray, setBooleanArray] = useState([]);
+  const [checked, setChecked] = useState([]);
 
   useEffect(() => {
     setBooleanArray([]);
@@ -41,9 +42,17 @@ function SavedPlace(props) {
       <Accordion defaultActiveKey="0">
         <Accordion.Item eventKey="0">
           <Accordion.Header>SavedPlace</Accordion.Header>
-          <Accordion.Body>{body}</Accordion.Body>
+          <Accordion.Body>
+            {body}{" "}
+            {props.savedPlaces.map(({ id, name }) => (
+              <div key={id}>{name}</div>
+            ))}
+          </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+      <div>
+        <div></div>
+      </div>
     </div>
   );
 }

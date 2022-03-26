@@ -6,7 +6,16 @@ import SavedRoutes from "./SavedRoutes";
 import { Button, CloseButton } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import { auth } from "../Firebase/firebase-config";
+import { app, auth, db } from "../Firebase/firebase-config";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  addDoc,
+  deleteDoc,
+  GeoPoint,
+} from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { Navigate } from "react-router-dom";
 
@@ -29,6 +38,8 @@ function NavBar(props) {
   ]);
   const [SBLabels, setSBLabels] = useState([]);
   const [searchBarRemoval, setSearchBarRemoval] = useState([]);
+  // For backend
+  const savedRoutesRef = collection(db, "routes");
 
   const handleSignOut = () => {
     signOut(auth)
@@ -128,7 +139,11 @@ function NavBar(props) {
           } else {
             return [
               ...current,
-              <CloseButton id={0} onClick={searchBarRemovalClicked} disabled={props.markers.length === 0}/>,
+              <CloseButton
+                id={0}
+                onClick={searchBarRemovalClicked}
+                disabled={props.markers.length === 0}
+              />,
             ];
           }
         });
@@ -203,9 +218,36 @@ function NavBar(props) {
       props.setRouteState(true);
     } else {
       props.setRouteState(false);
-      // props.setrouteLatlngs([]);
     }
   }
+
+  const [count, setCount] = useState(0);
+  const addSavedRoute = async () => {
+    const routeGeoPoints = props.routeLatlngs.map(
+      (point) => new GeoPoint(point.lat, point.lng)
+    );
+
+    // console.log("markers: ", props.markers);
+    const routeMarkers = props.markers.map(
+      (point) => new GeoPoint(point.lat, point.lng)
+    );
+    const markerNames = props.markers.map((point) => point.address);
+    await addDoc(savedRoutesRef, {
+      name: "route" + count,
+      userId: props.userId,
+      routeGeoPoints: routeGeoPoints,
+      directions: props.cleanRouteData.directions,
+      distance: props.cleanRouteData.distance,
+      duration: props.cleanRouteData.duration,
+      via: props.cleanRouteData.via,
+      routeMarkers: routeMarkers,
+      markerNames: markerNames,
+    });
+
+    setCount(count + 1);
+    console.log("ROUTE SAVED");
+    props.setSRisChanged((prev) => !prev);
+  };
 
   let body, buttons;
   if (props.isRouted) {
@@ -215,7 +257,10 @@ function NavBar(props) {
           {" "}
           Back{" "}
         </Button>
-        <Button variant="secondary"> Add to Saved Routes </Button>
+        <Button variant="secondary" onClick={addSavedRoute}>
+          {" "}
+          Add to Saved Routes{" "}
+        </Button>
       </div>
     );
 
@@ -251,8 +296,16 @@ function NavBar(props) {
           histSiteCheck={props.histSiteCheck}
           monumentCheck={props.monumentCheck}
         />
-        <SavedPlace savedPlaces={props.savedPlaces} />
-        <SavedRoutes />
+        <SavedPlace
+          savedPlaces={props.savedPlaces}
+          displaySP={props.displaySP}
+          setDisplaySP={props.setDisplaySP}
+        />
+        <SavedRoutes
+          savedRoutes={props.savedRoutes}
+          setDisplaySR={props.setDisplaySR}
+          displaySR={props.displaySR}
+        />
       </div>
     );
   }
