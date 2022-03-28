@@ -1,43 +1,57 @@
 import React, { useEffect, useState } from "react";
+import { Accordion, Form } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function SavedPlace(props) {
+  const [booleanArray, setBooleanArray] = useState([]);
   const [checked, setChecked] = useState([]);
 
   useEffect(() => {
-    
-  }, [props.savedPlaces])
-
-  const handleChange = (e) => {
-    console.log(e.target.id)
-    setChecked((current) => {
-      let newArray = current
-      newArray[e.target.id] = !current[e.target.id]
-      return newArray
+    setBooleanArray([]);
+    props.savedPlaces.forEach(() => {
+      setBooleanArray((current) => {
+        if (current.length > 0) {
+          let newArray = [...current];
+          newArray[current.length] = false;
+          return newArray;
+        } else {
+          return [...current, false];
+        }
+      });
     });
-  };
+  }, []);
 
-  const Checkbox = ({ label, value, onChange }) => {
-    return (
-      <label>
-        <input type="checkbox" checked={value} onChange={onChange} />
-        {label}
-      </label>
+  let body;
+  if (props.savedPlaces.length > 0) {
+    body = (
+      <Form.Check
+        type="switch"
+        id="historic-sites"
+        label="Historic Sites"
+        defaultChecked={true}
+        onClick={() => console.log("Clicked")}
+      />
     );
-  };
+  } else {
+    body = <p>You have no saved places.</p>;
+  }
 
-  console.log("checked: ", checked);
-  console.log("savedPlaces: ", props.savedPlaces);
+  console.log("SavedPlaces: ", props.savedPlaces);
   return (
     <div>
-      <div>SavedPlace</div>
+      <Accordion defaultActiveKey="0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>SavedPlace</Accordion.Header>
+          <Accordion.Body>
+            {body}{" "}
+            {props.savedPlaces.map(({ id, name }) => (
+              <div key={id}>{name}</div>
+            ))}
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
       <div>
-        <div>
-          {props.savedPlaces.map(({ id, name }) => (
-            <div key={id}>{name}</div>
-          ))}
-        </div>
-        <Checkbox label="My Value" value={checked} onChange={handleChange} id={0}/>
-        <p>Is "My Value" checked? {checked.toString()}</p>
+        <div></div>
       </div>
     </div>
   );

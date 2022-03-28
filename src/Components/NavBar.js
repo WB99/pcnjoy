@@ -3,11 +3,20 @@ import SearchBar from "./SearchBar";
 import Landmarks from "./Landmarks";
 import SavedPlace from "./SavedPlace";
 import SavedRoutes from "./SavedRoutes";
-import { Button } from "react-bootstrap";
+import { Button, CloseButton } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import { app, auth, db } from "../Firebase/firebase-config";
-import { collection, doc, setDoc, getDoc, addDoc, deleteDoc, GeoPoint, query, where } from "firebase/firestore";
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  addDoc, 
+  deleteDoc, 
+  GeoPoint, 
+  query, 
+  where } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { Navigate } from "react-router-dom";
 
@@ -111,14 +120,14 @@ function NavBar(props) {
       searchBar.forEach(() => {
         setSBLabels((current) => {
           if (current.length === 0) {
-            return [...current, <p>Start</p>];
+            return [...current, <p key={0}>Start</p>];
           } else if (current.length === searchBar.length - 1) {
             let newArray = [...current];
-            newArray[current.length] = <p>End</p>;
+            newArray[current.length] = <p key={current.length}>End</p>;
             return newArray;
           } else {
             let newArray = [...current];
-            newArray[current.length] = <p>Point</p>;
+            newArray[current.length] = <p key={current.length}>Point</p>;
             return newArray;
           }
         });
@@ -126,17 +135,20 @@ function NavBar(props) {
           if (current.length > 0) {
             let newArray = [...current];
             newArray[current.length] = (
-              <Button id={current.length} onClick={searchBarRemovalClicked}>
-                Remove
-              </Button>
+              <CloseButton
+                id={current.length}
+                onClick={searchBarRemovalClicked}
+              />
             );
             return newArray;
           } else {
             return [
               ...current,
-              <Button id={0} onClick={searchBarRemovalClicked}>
-                Remove
-              </Button>,
+              <CloseButton
+                id={0}
+                onClick={searchBarRemovalClicked}
+                disabled={props.markers.length === 0}
+              />,
             ];
           }
         });
@@ -229,11 +241,11 @@ function NavBar(props) {
     }
   }
 
-  const [count,setCount] = useState(0);
+  const [count, setCount] = useState(0);
   const addSavedRoute = async () => {
-    const routeGeoPoints = props.routeLatlngs.map((point) => (
-      new GeoPoint(point.lat, point.lng)
-    ));
+    const routeGeoPoints = props.routeLatlngs.map(
+      (point) => new GeoPoint(point.lat, point.lng)
+    );
 
     // console.log("markers: ", props.markers);
     const routeMarkers = props.markers.map((point) => (
@@ -249,7 +261,7 @@ function NavBar(props) {
       duration: props.cleanRouteData.duration,
       via: props.cleanRouteData.via,
       routeMarkers: routeMarkers,
-      markerNames: markerNames
+      markerNames: markerNames,
     });
 
     setCount(count+1);
@@ -321,14 +333,12 @@ function NavBar(props) {
           histSiteCheck={props.histSiteCheck}
           monumentCheck={props.monumentCheck}
         />
-        <hr className={classes.solid}></hr>
-        <SavedPlace 
+        <SavedPlace
           savedPlaces={props.savedPlaces}
           displaySP={props.displaySP}
           setDisplaySP={props.setDisplaySP}
         />
-        <hr className={classes.solid}></hr>
-        <SavedRoutes 
+        <SavedRoutes
           savedRoutes={props.savedRoutes}
           setDisplaySR={props.setDisplaySR}
           displaySR={props.displaySR}
