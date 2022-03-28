@@ -12,14 +12,20 @@ import length from "../Assets/length.png";
   function Directions(props) {
     
     const listDirs = props.data.directions.map((dir) =>
-        <div className={classes.listWrapper}>
-            <p className={classes.dir}>{dir}</p>
+        <div>
+            <p className={classes.text}>{dir}</p>
             <hr className={classes.rounded}></hr>
         </div>
     );
   
     return (
       <div className={classes.root}>
+        <div>
+          { props.displaySR ? 
+            (<h1>{props.displaySR.name}</h1>)
+            : null 
+          }
+        </div>
         <div className={classes.timeDistContainer}>
             <div className={classes.indivContainer}>
                 <img className={classes.icon} src={clock} />
@@ -39,7 +45,7 @@ import length from "../Assets/length.png";
 
         <hr className={classes.rounded}></hr>
         
-        <div className={classes.directions}>
+        <div>
             <h1 className={classes.title}>Directions</h1>
             {listDirs}
         </div>

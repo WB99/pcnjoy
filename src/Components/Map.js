@@ -17,10 +17,13 @@ import {
   getDoc,
   addDoc,
   deleteDoc,
+  GeoPoint
 } from "firebase/firestore";
 
 import historicSites from "../Assets/historic-sites.json";
 import monuments from "../Assets/monuments.json";
+
+import "@fontsource/montserrat";
 
 const libraries = ["places"];
 const mapContainerStyle = {
@@ -47,11 +50,12 @@ function Map(props) {
   });
   const [check, setCheck] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showSPModal, setShowSPModal] = useState(false);
+  const [SPModalValue, setSPModalValue] = useState("");
   // For backend
   const savedPlacesRef = collection(db, "places");
-  const [count, setCount] = useState(0);
-  const [modalValue, setModalValue] = useState("");
+  const savedRoutesRef = collection(db, "routes");
+
 
   useEffect(() => {
     let isMounted = true;
@@ -133,8 +137,9 @@ function Map(props) {
     setSelected(null);
   };
 
+  ////// ADD REMOVE SAVED PLACES ////////
   const addSavedPlace = async () => {
-    setShowModal(false);
+    setShowSPModal(false);
     props.setSavedPlaces((current) => {
       if (current.length > 0) {
         let newArray = [...current];
@@ -143,7 +148,7 @@ function Map(props) {
           lat: selected.lat,
           lng: selected.lng,
           isSaved: true,
-          name: modalValue,
+          name: SPModalValue,
         };
         return newArray;
       } else {
@@ -151,19 +156,18 @@ function Map(props) {
       }
     });
     await addDoc(savedPlacesRef, {
-      name: modalValue,
+      name: SPModalValue,
       lat: selected.lat,
       lng: selected.lng,
       userId: props.userId,
     });
-    setCount(count + 1);
     setSelected(null);
     setCheck(null);
-    setModalValue("");
+    setSPModalValue("");
     props.setSPisChanged((prev) => !prev);
   };
 
-  const modalHandleClose = () => setShowModal(false);
+  const SPModalHandleClose = () => setShowSPModal(false);
 
   const removeSavedPlace = async () => {
     props.setSavedPlaces((current) => {
@@ -182,6 +186,42 @@ function Map(props) {
     setCheck(null);
     props.setSPisChanged((prev) => !prev);
   };
+
+
+   ////// ADD SAVED ROUTES ////////
+   const SRModalHandleClose = () => props.setShowSRModal(false);
+
+   const addSavedRoute = async () => {
+    const routeGeoPoints = props.routeLatlngs.map(
+      (point) => new GeoPoint(point.lat, point.lng)
+    );
+
+    // console.log("markers: ", props.markers);
+    const routeMarkers = props.markers.map((point) => (
+      new GeoPoint(point.lat, point.lng)
+    ))
+    const markerNames = props.markers.map((point) => (point.address))
+    const docRef = await addDoc(savedRoutesRef, {
+      name: props.SRModalValue,
+      userId: props.userId,
+      routeGeoPoints: routeGeoPoints,
+      directions: props.cleanRouteData.directions,
+      distance: props.cleanRouteData.distance,
+      duration: props.cleanRouteData.duration,
+      via: props.cleanRouteData.via,
+      routeMarkers: routeMarkers,
+      markerNames: markerNames,
+    });
+    
+    // get newly added route
+    const newDoc = await getDoc(docRef);
+    const newRoute = {...newDoc.data(), id: docRef.id}
+    console.log("NEW ROUTE: ", newRoute);
+    props.setSRisChanged((prev)=>(!prev));
+    props.setDisplaySR(newRoute);
+    SRModalHandleClose()
+  };
+
 
   if (!isLoaded) {
     return "Loading Maps";
@@ -328,7 +368,7 @@ function Map(props) {
                   Remove from Saved Place
                 </Button>
               ) : (
-                <Button onClick={() => setShowModal(true)}>
+                <Button onClick={() => setShowSPModal(true)}>
                   Add to Saved Place
                 </Button>
               )}
@@ -357,20 +397,19 @@ function Map(props) {
           }}
         />
 
-        {showModal ? (
+        {showSPModal ? (
           <Modal
-            show={showModal}
-            onHide={modalHandleClose}
+            show={showSPModal}
+            onHide={SPModalHandleClose}
             backdrop="static"
             keyboard={false}
             centered
           >
             <Modal.Header closeButton>
-              <Modal.Title>{props.address}</Modal.Title>
+              <Modal.Title>Add to Saved Places</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              Location: {parseFloat(selected.lat).toFixed(3)},{" "}
-              {parseFloat(selected.lng).toFixed(3)}
+              Location: {props.address}
               <FloatingLabel
                 controlId="floatingInput"
                 label="Enter a name for your saved place"
@@ -380,19 +419,61 @@ function Map(props) {
                   type="text"
                   placeholder="Enter a name for your saved place"
                   onChange={(e) => {
-                    setModalValue(e.target.value);
+                    setSPModalValue(e.target.value);
                   }}
                 />
               </FloatingLabel>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={modalHandleClose}>
+              <Button variant="secondary" onClick={SPModalHandleClose}>
                 Close
               </Button>
               <Button
                 variant="primary"
                 onClick={addSavedPlace}
-                disabled={!modalValue}
+                disabled={!SPModalValue}
+              >
+                Confirm
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        ) : null}
+
+        {props.showSRModal ? (
+          <Modal
+            show={props.showSRModal}
+            onHide={SRModalHandleClose}
+            backdrop="static"
+            keyboard={false}
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Add to Saved Routes</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              PCNs: {props.cleanRouteData.via}
+              <FloatingLabel
+                controlId="floatingInput"
+                label="Enter a name for your saved route"
+                className="mb-3"
+              >
+                <Form.Control
+                  type="text"
+                  placeholder="Enter a name for your saved route"
+                  onChange={(e) => {
+                    props.setSRModalValue(e.target.value);
+                  }}
+                />
+              </FloatingLabel>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={SRModalHandleClose}>
+                Close
+              </Button>
+              <Button
+                variant="primary"
+                onClick={addSavedRoute}
+                disabled={!props.SRModalValue}
               >
                 Confirm
               </Button>

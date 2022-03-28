@@ -13,7 +13,10 @@ import {
   getDocs,
   query,
   where,
+  GeoPoint 
 } from "firebase/firestore";
+import "@fontsource/montserrat";
+
 
 function MainPage() {
   const [mapsLoaded, setMapsLoaded] = useState(null);
@@ -41,9 +44,11 @@ function MainPage() {
   const [SPisChanged, setSPisChanged] = useState(false);
   const [displaySP, setDisplaySP] = useState([]);
 
+  const [showSRModal, setShowSRModal] = useState(false)
+  const [SRModalValue, setSRModalValue] = useState("");
   const [savedRoutes, setSavedRoutes] = useState([]);
   const [SRisChanged, setSRisChanged] = useState(false);
-  const [displaySR, setDisplaySR] = useState({});
+  const [displaySR, setDisplaySR] = useState(null);
 
   const savedPlacesRef = collection(db, "places");
   const savedRoutesRef = collection(db, "routes");
@@ -53,7 +58,7 @@ function MainPage() {
     const user = auth.currentUser;
     setUserId(user.uid);
   }, []);
-
+  
   useEffect(() => {
     if (userId !== "") {
       getSavedPlaces();
@@ -66,11 +71,52 @@ function MainPage() {
     }
   }, [userId, SRisChanged]);
 
-  useEffect(() => {
-    // setRouteLatLong
-    // setRouteState
-    // setMarkers
-  }, [displaySR]);
+  useEffect(()=>{
+    // for setmarkers
+    function buildMarkers(routeMarkers, markerNames){
+      var builtMarkers = []
+      for(let i=0; i<routeMarkers.length; i++){
+        var routeMarker = {
+          address: markerNames[i],
+          key: routeMarkers[i]._lat.toString() + routeMarkers[i]._long.toString(),
+          lat: routeMarkers[i]._lat,
+          lng: routeMarkers[i]._long
+        }
+        builtMarkers.push(routeMarker);
+      } 
+      return builtMarkers
+    }
+
+    // // for setRouteLatLong
+    function buildRoute(routeGeoPoints){
+      const builtRoute = routeGeoPoints.map((point) => 
+        ({lat: point._lat, lng: point._long})
+      )
+      return builtRoute
+    }
+
+    if(displaySR) {
+      // for setCleanRouteData
+      const builtRouteData = {
+        directions: displaySR.directions,
+        distance: displaySR.distance,
+        duration: displaySR.duration,
+        via: displaySR.via
+      }
+      setCleanRouteData(builtRouteData)
+
+      // setRouteLatLong
+      const builtRoute = buildRoute(displaySR.routeGeoPoints);
+      setrouteLatlngs(builtRoute);
+      
+      // setMarkers
+      const builtMarkers = buildMarkers(displaySR.routeMarkers, displaySR.markerNames)
+      setMarkers(builtMarkers);
+
+      // setRouteState
+      setRouteState(true);
+    }
+  }, [displaySR])
 
   async function getSavedPlaces() {
     const q = query(savedPlacesRef, where("userId", "==", userId));
@@ -110,6 +156,7 @@ function MainPage() {
   useEffect(() => {
     if (!isRouted) {
       setrouteLatlngs([]);
+
     }
   }, [isRouted]);
 
@@ -194,16 +241,10 @@ function MainPage() {
 
       // decode polyline
       var latlngs = [];
-      // console.log("route data length ", routeData.length)
       for (let j = 0; j < routeData.length; j++) {
-        // console.log("INSIDELOOP: ")
-
-        // console.log("routeGeometry: ", routeData[j].route_geometry)
         var encoded = routeData[j].route_geometry;
         var polyUtil = require("polyline-encoded");
         var latlngArray = polyUtil.decode(encoded);
-
-        // console.log("LATLNG ARRAY: ", latlngArray)
 
         latlngArray.forEach((item) => {
           var output = {
@@ -213,14 +254,10 @@ function MainPage() {
           latlngs.push(output);
         });
       }
-
-      // console.log("LATLNG ARRAY: ", latlngs)
-      // setRouteReq(false)
       setrouteLatlngs(latlngs);
     }
     // oneMap Routing Api
   }, [routeData]);
-  // console.log("LATLONGSS: ", routeLatlngs)
 
   return (
     <div className={classes.root}>
@@ -229,6 +266,7 @@ function MainPage() {
           setMapsLoaded={setMapsLoaded}
           setRouteState={setRouteState}
           routeLatlngs={routeLatlngs}
+          cleanRouteData={cleanRouteData}
           coord={coord}
           markers={markers}
           setMarkers={setMarkers}
@@ -247,6 +285,15 @@ function MainPage() {
           SPisChanged={SPisChanged}
           displaySP={displaySP}
           setDisplaySP={setDisplaySP}
+          showSRModal={showSRModal}
+          setShowSRModal={setShowSRModal}
+          SRModalValue={SRModalValue}
+          setSRModalValue={setSRModalValue}
+          setSRisChanged={setSRisChanged}
+          SRisChanged={SRisChanged}
+          savedRoutes={savedRoutes}
+          setDisplaySR={setDisplaySR}
+          displaySR={displaySR}
         />
       </div>
       <div className={classes.NavBar}>
@@ -261,6 +308,7 @@ function MainPage() {
           setRouteState={setRouteState}
           isRouted={isRouted}
           cleanRouteData={cleanRouteData}
+          setCleanRouteData={setCleanRouteData}
           routeLatlngs={routeLatlngs}
           setrouteLatlngs={setrouteLatlngs}
           setHistSite={setHistSite}
@@ -274,6 +322,10 @@ function MainPage() {
           SPisChanged={SPisChanged}
           displaySP={displaySP}
           setDisplaySP={setDisplaySP}
+          showSRModal={showSRModal}
+          setShowSRModal={setShowSRModal}
+          SRModalValue={SRModalValue}
+          setSRModalValue={setSRModalValue}
           setSRisChanged={setSRisChanged}
           SRisChanged={SRisChanged}
           savedRoutes={savedRoutes}
