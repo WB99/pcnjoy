@@ -12,8 +12,11 @@ import {
   addDoc, 
   getDocs,
   query,
-  where 
+  where,
+  GeoPoint 
 } from "firebase/firestore";
+import "@fontsource/montserrat";
+
 
 function MainPage() {
   const [mapsLoaded, setMapsLoaded] = useState(null);
@@ -43,7 +46,7 @@ function MainPage() {
   
   const [savedRoutes, setSavedRoutes] = useState([]);
   const [SRisChanged, setSRisChanged] = useState(false);
-  const [displaySR, setDisplaySR] = useState({});
+  const [displaySR, setDisplaySR] = useState(null);
 
 
   const savedPlacesRef = collection(db, "places");
@@ -56,7 +59,6 @@ function MainPage() {
     const user = auth.currentUser;
     setUserId(user.uid);
   }, []);
-  // console.log("USER id: ", userId)
   
   useEffect(() => {
     if(userId !== ""){
@@ -68,20 +70,62 @@ function MainPage() {
   useEffect(()=>{
     setDisplaySP(savedPlaces); // FOR NOW: all saved places are displayed
     // toggle logic do in savedplaces.js
-    console.log("Saved Places HERE", savedPlaces);
   }, [savedPlaces])
   
   useEffect(() => {
     if(userId !== ""){
-      getSavedRoutes()
+      getSavedRoutes();
     }
   }, [userId, SRisChanged])
 
   useEffect(()=>{
-    // setRouteLatLong
-    // setRouteState
-    // setMarkers
+    // for setmarkers
+    function buildMarkers(routeMarkers, markerNames){
+      var builtMarkers = []
+      for(let i=0; i<routeMarkers.length; i++){
+        var routeMarker = {
+          address: markerNames[i],
+          key: routeMarkers[i]._lat.toString() + routeMarkers[i]._long.toString(),
+          lat: routeMarkers[i]._lat,
+          lng: routeMarkers[i]._long
+        }
+        builtMarkers.push(routeMarker);
+      } 
+      return builtMarkers
+    }
+
+    // // for setRouteLatLong
+    function buildRoute(routeGeoPoints){
+      const builtRoute = routeGeoPoints.map((point) => 
+        ({lat: point._lat, lng: point._long})
+      )
+      return builtRoute
+    }
+
+    if(displaySR) {
+      // for setCleanRouteData
+      const builtRouteData = {
+        directions: displaySR.directions,
+        distance: displaySR.distance,
+        duration: displaySR.duration,
+        via: displaySR.via
+      }
+      setCleanRouteData(builtRouteData)
+
+      // setRouteLatLong
+      const builtRoute = buildRoute(displaySR.routeGeoPoints);
+      setrouteLatlngs(builtRoute);
+      
+      // setMarkers
+      const builtMarkers = buildMarkers(displaySR.routeMarkers, displaySR.markerNames)
+      setMarkers(builtMarkers);
+
+      // setRouteState
+      setRouteState(true);
+    }
   }, [displaySR])
+
+  console.log("DISPLAYSR: ", displaySR)
 
   async function getSavedPlaces() {
     const q = query(savedPlacesRef, where("userId", "==", userId))
@@ -120,6 +164,7 @@ function MainPage() {
   useEffect(() => {
     if (!isRouted) {
       setrouteLatlngs([]);
+
     }
   }, [isRouted]);
 
@@ -204,16 +249,10 @@ function MainPage() {
 
       // decode polyline
       var latlngs = [];
-      // console.log("route data length ", routeData.length)
       for (let j = 0; j < routeData.length; j++) {
-        // console.log("INSIDELOOP: ")
-
-        // console.log("routeGeometry: ", routeData[j].route_geometry)
         var encoded = routeData[j].route_geometry;
         var polyUtil = require("polyline-encoded");
         var latlngArray = polyUtil.decode(encoded);
-
-        // console.log("LATLNG ARRAY: ", latlngArray)
 
         latlngArray.forEach((item) => {
           var output = {
@@ -223,14 +262,10 @@ function MainPage() {
           latlngs.push(output);
         });
       }
-
-      // console.log("LATLNG ARRAY: ", latlngs)
-      // setRouteReq(false)
       setrouteLatlngs(latlngs);
     }
     // oneMap Routing Api
   }, [routeData]);
-  // console.log("LATLONGSS: ", routeLatlngs)
 
   return (
     <div className={classes.root}>
@@ -271,6 +306,7 @@ function MainPage() {
           setRouteState={setRouteState}
           isRouted={isRouted}
           cleanRouteData={cleanRouteData}
+          setCleanRouteData={setCleanRouteData}
           routeLatlngs={routeLatlngs}
           setrouteLatlngs={setrouteLatlngs}
           setHistSite={setHistSite}

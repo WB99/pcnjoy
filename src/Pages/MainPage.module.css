@@ -1,4 +1,5 @@
 .root {
+  font-family: 'Montserrat';
   display: flex;
   flex-direction: column;
   overflow: hidden;

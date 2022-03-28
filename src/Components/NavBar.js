@@ -7,12 +7,15 @@ import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import { app, auth, db } from "../Firebase/firebase-config";
-import { collection, doc, setDoc, getDoc, addDoc, deleteDoc, GeoPoint } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, addDoc, deleteDoc, GeoPoint, query, where } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { Navigate } from "react-router-dom";
 
 import classes from "./NavBar.module.css";
 import Directions from "./Directions";
+
+import "@fontsource/montserrat";
+
 
 const searchBarLimit = 5;
 
@@ -30,6 +33,7 @@ function NavBar(props) {
   ]);
   const [SBLabels, setSBLabels] = useState([]);
   const [searchBarRemoval, setSearchBarRemoval] = useState([]);
+  const [SRadded, setSRAdded] = useState(false);
   // For backend
   const savedRoutesRef = collection(db, "routes");
 
@@ -202,11 +206,26 @@ function NavBar(props) {
   }, [props.mapsLoaded]);
 
   function routeHandler(showRoute) {
+    // setSRAdded(false);
     if (showRoute) {
       props.setRouteReq(true);
       props.setRouteState(true);
-    } else {
-      props.setRouteState(false);
+    } else { // false
+        if(props.displaySR){
+          props.setRouteState(false);
+          props.setMarkers([]);
+          props.setCleanRouteData({
+            duration: null,
+            distance: null,
+            via: null,
+            directions: [],
+          });
+          props.setrouteLatlngs([]);
+          props.setDisplaySR(null);
+        }
+        else{
+          props.setRouteState(false);
+        }
     }
   }
 
@@ -221,7 +240,7 @@ function NavBar(props) {
       new GeoPoint(point.lat, point.lng)
     ))
     const markerNames = props.markers.map((point) => (point.address))
-    await addDoc(savedRoutesRef, {
+    const docRef = await addDoc(savedRoutesRef, {
       name: "route"+count,
       userId: props.userId,
       routeGeoPoints: routeGeoPoints,
@@ -233,28 +252,47 @@ function NavBar(props) {
       markerNames: markerNames
     });
 
-
     setCount(count+1);
-    console.log("ROUTE SAVED");
+    
+    // get newly added route
+    const newDoc = await getDoc(docRef);
+    const newRoute = {...newDoc.data(), id: docRef.id}
+    console.log("NEW ROUTE: ", newRoute);
     props.setSRisChanged((prev)=>(!prev));
+    props.setDisplaySR(newRoute);
+    // setSRAdded(true);
   };
+
+  const removeSavedRoute = async () => {
+    console.log("ROUTE ID:  ", props.displaySR.id)
+    const routeDoc = doc(db, "routes", props.displaySR.id);
+    await deleteDoc(routeDoc);
+    props.setDisplaySR(null);
+    routeHandler(false);
+    props.setSRisChanged((prev)=>(!prev));
+    // setSRAdded(false);
+  }
 
   let body, buttons;
   if (props.isRouted) {
     buttons = (
       <div>
         <Button variant="danger" onClick={() => routeHandler(false)}>
-          {" "}
-          Back{" "}
+          Back
         </Button>
-        <Button variant="secondary" onClick={addSavedRoute}> Add to Saved Routes </Button>
+        { (props.displaySR) ? (
+          <Button variant="secondary" onClick={removeSavedRoute}> Remove from Saved Routes </Button>
+        ) 
+        : (
+          <Button variant="secondary" onClick={addSavedRoute}> Add to Saved Routes </Button>
+        )
+        }
       </div>
     );
 
     body = (
-      <div style={{ height: "40%" }}>
-        <hr className={classes.rounded}></hr>
-        <Directions data={props.cleanRouteData} />
+      <div>
+        <Directions data={props.cleanRouteData} displaySR={props.displaySR}/>
       </div>
     );
   } else {
@@ -277,7 +315,6 @@ function NavBar(props) {
 
     body = (
       <div>
-        <hr className={classes.rounded}></hr>
         <Landmarks 
           setHistSite={props.setHistSite} 
           setMonument={props.setMonument}
@@ -305,21 +342,29 @@ function NavBar(props) {
   } else {
     return (
       <div className={classes.root}>
-        <div className={classes.title}>
-          <div>PCNJOY</div>
-          <div>
-            {" "}
-            <Button onClick={handleSignOut}>Sign Out</Button>
+          <div className={classes.title}>
+            <div>PCNJOY</div>
+            <div>
+              {" "}
+              <Button onClick={handleSignOut}>Sign Out</Button>
+            </div>
           </div>
-        </div>
-        <hr className={classes.solid}></hr>
-        <div className={classes.search}>
-          <div className={classes.SBLabels}>{SBLabels}</div>
-          <div className={classes.searchBar}>{searchBar}</div>
-          <div className={classes.searchBarRemoval}>{searchBarRemoval}</div>
-        </div>
-        {buttons}
-        {body}
+          <hr className={classes.solid}></hr>
+          <div className={classes.search}>
+            <div className={classes.SBLabels}>{SBLabels}</div>
+            <div className={classes.searchBar}>{searchBar}</div>
+            <div className={classes.searchBarRemoval}>{searchBarRemoval}</div>
+          </div>
+
+          <div className={classes.button}>
+            {buttons}
+            <hr className={classes.rounded}></hr>
+          </div>
+         
+          <div className={classes.body}>
+            {body}
+          </div>
+          
       </div>
     );
   }

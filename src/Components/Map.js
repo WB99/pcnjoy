@@ -15,6 +15,7 @@ import { collection, doc, setDoc, getDoc, addDoc, deleteDoc } from "firebase/fir
 import historicSites from "../Assets/historic-sites.json";
 import monuments from "../Assets/monuments.json";
 
+import "@fontsource/montserrat";
 
 
 const libraries = ["places"];
