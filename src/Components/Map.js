@@ -139,22 +139,6 @@ function Map(props) {
 
   ////// ADD REMOVE SAVED PLACES ////////
   const addSavedPlace = async () => {
-    setShowSPModal(false);
-    props.setSavedPlaces((current) => {
-      if (current.length > 0) {
-        let newArray = [...current];
-        newArray[current.length] = {
-          key: selected.key,
-          lat: selected.lat,
-          lng: selected.lng,
-          isSaved: true,
-          name: SPModalValue,
-        };
-        return newArray;
-      } else {
-        return [...current, selected];
-      }
-    });
     await addDoc(savedPlacesRef, {
       name: SPModalValue,
       lat: selected.lat,
@@ -170,16 +154,6 @@ function Map(props) {
   const SPModalHandleClose = () => setShowSPModal(false);
 
   const removeSavedPlace = async () => {
-    props.setSavedPlaces((current) => {
-      let newArray = [...current];
-      for (var i = 0; i < newArray.length; i++) {
-        if (newArray[i].name === selected.name) {
-          newArray.splice(i, 1);
-          break;
-        }
-      }
-      return newArray;
-    });
     const placeDoc = doc(db, "places", selected.id);
     await deleteDoc(placeDoc);
     setSelected(null);
