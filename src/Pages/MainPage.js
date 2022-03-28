@@ -4,15 +4,15 @@ import NavBar from "../Components/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import classes from "./MainPage.module.css";
 import { app, auth, db } from "../Firebase/firebase-config";
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  addDoc, 
+import {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  addDoc,
   getDocs,
   query,
-  where 
+  where,
 } from "firebase/firestore";
 
 function MainPage() {
@@ -29,78 +29,68 @@ function MainPage() {
     directions: [],
   });
   const [userId, setUserId] = useState("");
-  
+
   const [routeReq, setRouteReq] = useState(false);
   const [isRouted, setRouteState] = useState(false);
   const [routeLatlngs, setrouteLatlngs] = useState([]);
-  
+
   const [histSiteCheck, setHistSite] = useState(false);
   const [monumentCheck, setMonument] = useState(false);
-  
+
   const [savedPlaces, setSavedPlaces] = useState([]);
   const [SPisChanged, setSPisChanged] = useState(false);
   const [displaySP, setDisplaySP] = useState([]);
-  
+
   const [savedRoutes, setSavedRoutes] = useState([]);
   const [SRisChanged, setSRisChanged] = useState(false);
   const [displaySR, setDisplaySR] = useState({});
 
-
   const savedPlacesRef = collection(db, "places");
   const savedRoutesRef = collection(db, "routes");
-
-
 
   useEffect(() => {
     getToken();
     const user = auth.currentUser;
     setUserId(user.uid);
   }, []);
-  // console.log("USER id: ", userId)
-  
-  useEffect(() => {
-    if(userId !== ""){
-      getSavedPlaces()
-    }
-  }, [userId, SPisChanged])
-  
-  
-  useEffect(()=>{
-    setDisplaySP(savedPlaces); // FOR NOW: all saved places are displayed
-    // toggle logic do in savedplaces.js
-    console.log("Saved Places HERE", savedPlaces);
-  }, [savedPlaces])
-  
-  useEffect(() => {
-    if(userId !== ""){
-      getSavedRoutes()
-    }
-  }, [userId, SRisChanged])
 
-  useEffect(()=>{
+  useEffect(() => {
+    if (userId !== "") {
+      getSavedPlaces();
+    }
+  }, [userId, SPisChanged]);
+
+  useEffect(() => {
+    if (userId !== "") {
+      getSavedRoutes();
+    }
+  }, [userId, SRisChanged]);
+
+  useEffect(() => {
     // setRouteLatLong
     // setRouteState
     // setMarkers
-  }, [displaySR])
+  }, [displaySR]);
 
   async function getSavedPlaces() {
-    const q = query(savedPlacesRef, where("userId", "==", userId))
+    const q = query(savedPlacesRef, where("userId", "==", userId));
     const places = await getDocs(q);
-    const placesData = places.docs.map(
-      (doc) => ({...doc.data(), id: doc.id}) 
-    )
+    const placesData = places.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    }));
     setSavedPlaces(placesData);
   }
 
   async function getSavedRoutes() {
-    const q = query(savedRoutesRef, where("userId", "==", userId))
+    const q = query(savedRoutesRef, where("userId", "==", userId));
     const routes = await getDocs(q);
-    const routesData = routes.docs.map(
-      (doc) => ({...doc.data(), id: doc.id}) 
-    )
+    const routesData = routes.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    }));
     setSavedRoutes(routesData);
   }
-  
 
   async function getToken() {
     try {

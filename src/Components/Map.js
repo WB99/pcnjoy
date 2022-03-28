@@ -51,6 +51,7 @@ function Map(props) {
   // For backend
   const savedPlacesRef = collection(db, "places");
   const [count, setCount] = useState(0);
+  const [modalValue, setModalValue] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -128,9 +129,8 @@ function Map(props) {
       }
       return newArray;
     });
-    // setCheck(selected);
-    setSelected(null);
     setCheck(null);
+    setSelected(null);
   };
 
   const addSavedPlace = async () => {
@@ -138,14 +138,20 @@ function Map(props) {
     props.setSavedPlaces((current) => {
       if (current.length > 0) {
         let newArray = [...current];
-        newArray[current.length] = selected;
+        newArray[current.length] = {
+          key: selected.key,
+          lat: selected.lat,
+          lng: selected.lng,
+          isSaved: true,
+          name: modalValue,
+        };
         return newArray;
       } else {
         return [...current, selected];
       }
     });
     await addDoc(savedPlacesRef, {
-      name: "place" + count,
+      name: modalValue,
       lat: selected.lat,
       lng: selected.lng,
       userId: props.userId,
@@ -153,16 +159,17 @@ function Map(props) {
     setCount(count + 1);
     setSelected(null);
     setCheck(null);
+    setModalValue("");
     props.setSPisChanged((prev) => !prev);
   };
 
-  const handleClose = () => setShowModal(false);
+  const modalHandleClose = () => setShowModal(false);
 
   const removeSavedPlace = async () => {
     props.setSavedPlaces((current) => {
       let newArray = [...current];
       for (var i = 0; i < newArray.length; i++) {
-        if (newArray[i].key === selected.key) {
+        if (newArray[i].name === selected.name) {
           newArray.splice(i, 1);
           break;
         }
@@ -175,8 +182,6 @@ function Map(props) {
     setCheck(null);
     props.setSPisChanged((prev) => !prev);
   };
-
-  console.log("MARKERS CHECK: ", props.markers);
 
   if (!isLoaded) {
     return "Loading Maps";
@@ -244,24 +249,28 @@ function Map(props) {
             ))
           : null}
 
-        {props.displaySP.map((place) => (
-          <Marker
-            key={place.name}
-            position={{ lat: place.lat, lng: place.lng }}
-            icon={{
-              url: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
-            }}
-            onClick={() => {
-              setSelected({
-                key: place.name,
-                lat: place.lat,
-                lng: place.lng,
-                isSaved: true,
-                id: place.id,
-              });
-            }}
-          />
-        ))}
+        {props.displaySP
+          ? props.displaySP.map((place) =>
+              place != null ? (
+                <Marker
+                  key={place.name}
+                  position={{ lat: place.lat, lng: place.lng }}
+                  icon={{
+                    url: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
+                  }}
+                  onClick={() => {
+                    setSelected({
+                      key: place.name,
+                      lat: place.lat,
+                      lng: place.lng,
+                      isSaved: true,
+                      id: place.id,
+                    });
+                  }}
+                />
+              ) : null
+            )
+          : null}
 
         {check ? (
           <Marker
@@ -314,7 +323,7 @@ function Map(props) {
                 {parseFloat(selected.lat).toFixed(3)},{" "}
                 {parseFloat(selected.lng).toFixed(3)}
               </p>
-              {selected.isSaved ? ( // selected.isSaved
+              {selected.isSaved ? (
                 <Button onClick={removeSavedPlace}>
                   Remove from Saved Place
                 </Button>
@@ -351,7 +360,7 @@ function Map(props) {
         {showModal ? (
           <Modal
             show={showModal}
-            onHide={handleClose}
+            onHide={modalHandleClose}
             backdrop="static"
             keyboard={false}
             centered
@@ -370,14 +379,21 @@ function Map(props) {
                 <Form.Control
                   type="text"
                   placeholder="Enter a name for your saved place"
+                  onChange={(e) => {
+                    setModalValue(e.target.value);
+                  }}
                 />
               </FloatingLabel>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
+              <Button variant="secondary" onClick={modalHandleClose}>
                 Close
               </Button>
-              <Button variant="primary" onClick={addSavedPlace}>
+              <Button
+                variant="primary"
+                onClick={addSavedPlace}
+                disabled={!modalValue}
+              >
                 Confirm
               </Button>
             </Modal.Footer>

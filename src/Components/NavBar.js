@@ -318,7 +318,6 @@ function NavBar(props) {
         <div className={classes.title}>
           <div>PCNJOY</div>
           <div>
-            {" "}
             <Button onClick={handleSignOut}>Sign Out</Button>
           </div>
         </div>

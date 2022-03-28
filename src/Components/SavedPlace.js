@@ -1,52 +1,97 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Accordion, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function SavedPlace(props) {
-  const [booleanArray, setBooleanArray] = useState([]);
-  const [checked, setChecked] = useState([]);
+  const [savedPlacesSwitch, setSavedPlacesSwitch] = useState([]);
 
   useEffect(() => {
-    setBooleanArray([]);
-    props.savedPlaces.forEach(() => {
-      setBooleanArray((current) => {
+    setSavedPlacesSwitch([]);
+    if (props.savedPlaces.length > 0) {
+      props.savedPlaces.forEach((savedPlace) => {
+        setSavedPlacesSwitch((current) => {
+          if (current.length > 0) {
+            let newArray = [...current];
+            newArray[current.length] = (
+              <Form.Check
+                type="switch"
+                id={savedPlace.id}
+                label={savedPlace.name}
+                defaultChecked={props.displaySP.includes(savedPlace)}
+                onClick={handleClick}
+              />
+            );
+            return newArray;
+          } else {
+            return [
+              ...current,
+              <Form.Check
+                type="switch"
+                id={savedPlace.id}
+                label={savedPlace.name}
+                defaultChecked={props.displaySP.includes(savedPlace)}
+                onClick={handleClick}
+              />,
+            ];
+          }
+        });
+      });
+    }
+    if (props.displaySP) {
+      props.setDisplaySP((current) => {
+        let newArray = [...current];
+        for (var i = 0; i < props.displaySP.length; i++) {
+          if (!props.savedPlaces.includes(newArray[i])) {
+            newArray.splice(i, 1);
+            break;
+          }
+        }
+        return newArray;
+      });
+    }
+  }, [props.savedPlaces]);
+
+  const handleClick = (e) => {
+    for (var i = 0; i < props.savedPlaces.length; i++) {
+      if (e.target.id === props.savedPlaces[i].id) {
+        break;
+      }
+    }
+    if (e.target.checked) {
+      props.setDisplaySP((current) => {
         if (current.length > 0) {
           let newArray = [...current];
-          newArray[current.length] = false;
+          newArray[current.length] = props.savedPlaces[i];
           return newArray;
         } else {
-          return [...current, false];
+          return [...current, props.savedPlaces[i]];
         }
       });
-    });
-  }, []);
+    } else {
+      props.setDisplaySP((current) => {
+        let newArray = [...current];
+        for (var i = 0; i < current.length; i++) {
+          if (newArray[i].id === e.target.id) {
+            newArray.splice(i, 1);
+            break;
+          }
+        }
+        return newArray;
+      });
+    }
+  };
 
-  let body;
-  if (props.savedPlaces.length > 0) {
-    body = (
-      <Form.Check
-        type="switch"
-        id="historic-sites"
-        label="Historic Sites"
-        defaultChecked={true}
-        onClick={() => console.log("Clicked")}
-      />
-    );
-  } else {
-    body = <p>You have no saved places.</p>;
-  }
-
-  console.log("SavedPlaces: ", props.savedPlaces);
   return (
     <div>
       <Accordion defaultActiveKey="0">
         <Accordion.Item eventKey="0">
           <Accordion.Header>SavedPlace</Accordion.Header>
           <Accordion.Body>
-            {body}{" "}
-            {props.savedPlaces.map(({ id, name }) => (
-              <div key={id}>{name}</div>
-            ))}
+            {savedPlacesSwitch.length > 0 ? (
+              savedPlacesSwitch
+            ) : (
+              <p>You have no saved places</p>
+            )}
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
