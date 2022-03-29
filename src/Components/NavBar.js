@@ -114,46 +114,51 @@ function NavBar(props) {
 
   // when SearchBar changes -> SBLabels and SearchBarRemoval changes
   useEffect(() => {
-    setSBLabels([]);
-    setSearchBarRemoval([]);
-    if (searchBar.length > 0) {
-      searchBar.forEach(() => {
-        setSBLabels((current) => {
-          if (current.length === 0) {
-            return [...current, <p key={0}>Start</p>];
-          } else if (current.length === searchBar.length - 1) {
-            let newArray = [...current];
-            newArray[current.length] = <p key={current.length}>End</p>;
-            return newArray;
-          } else {
-            let newArray = [...current];
-            newArray[current.length] = <p key={current.length}>Point</p>;
-            return newArray;
+      setSBLabels([]);
+      setSearchBarRemoval([]);
+      if (searchBar.length > 0) {
+        searchBar.forEach(() => {
+          setSBLabels((current) => {
+            if (current.length === 0) {
+              return [...current, <p key={0}>Start</p>];
+            } else if (current.length === searchBar.length - 1) {
+              let newArray = [...current];
+              newArray[current.length] = <p key={current.length}>End</p>;
+              return newArray;
+            } else {
+              let newArray = [...current];
+              newArray[current.length] = <p key={current.length}>Point</p>;
+              return newArray;
+            }
+          });
+          if(!props.displaySR){
+            setSearchBarRemoval((current) => {
+              if (current.length > 0) {
+                let newArray = [...current];
+                newArray[current.length] = (
+                  <CloseButton
+                    id={current.length}
+                    onClick={searchBarRemovalClicked}
+                  />
+                );
+                return newArray;
+              } else {
+                return [
+                  ...current,
+                  <CloseButton
+                    id={0}
+                    onClick={searchBarRemovalClicked}
+                    disabled={props.markers.length === 0}
+                  />,
+                ];
+              }
+            });
+          }
+          else {
+            setSearchBarRemoval([]);
           }
         });
-        setSearchBarRemoval((current) => {
-          if (current.length > 0) {
-            let newArray = [...current];
-            newArray[current.length] = (
-              <CloseButton
-                id={current.length}
-                onClick={searchBarRemovalClicked}
-              />
-            );
-            return newArray;
-          } else {
-            return [
-              ...current,
-              <CloseButton
-                id={0}
-                onClick={searchBarRemovalClicked}
-                disabled={props.markers.length === 0}
-              />,
-            ];
-          }
-        });
-      });
-    }
+      }
   }, [searchBar, props.isRouted]);
 
   const createSearchBar = () => {
@@ -303,6 +308,9 @@ function NavBar(props) {
           savedPlaces={props.savedPlaces}
           displaySP={props.displaySP}
           setDisplaySP={props.setDisplaySP}
+          setCoord={props.setCoord}
+          panToSP={props.panToSP}
+          setPanToSP={props.setPanToSP}
         />
         <SavedRoutes
           savedRoutes={props.savedRoutes}

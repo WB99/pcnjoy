@@ -18,7 +18,8 @@ function SavedRoutes(props) {
           <Accordion.Header>Saved Routes</Accordion.Header>
           <Accordion.Body>
             <div>
-              {props.savedRoutes.map((route) => (
+              { (props.savedRoutes.length > 0) ? (
+                props.savedRoutes.map((route) => (
                 <div className={classes.route}>
                   <div className={classes.indivContainer}>
                     <Button variant="link" className={classes.button} 
@@ -35,7 +36,10 @@ function SavedRoutes(props) {
                       <h1 className={classes.text}> {route.distance} </h1>
                   </div>
                 </div>
-              ))}
+              ))) : (
+                <p>You have no saved routes</p>
+              )
+            }
             </div>
           </Accordion.Body>
         </Accordion.Item>

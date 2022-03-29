@@ -13,7 +13,6 @@ import { app, auth, db } from "../Firebase/firebase-config";
 import {
   collection,
   doc,
-  setDoc,
   getDoc,
   addDoc,
   deleteDoc,
@@ -52,6 +51,7 @@ function Map(props) {
   const [selected, setSelected] = useState(null);
   const [showSPModal, setShowSPModal] = useState(false);
   const [SPModalValue, setSPModalValue] = useState("");
+
   // For backend
   const savedPlacesRef = collection(db, "places");
   const savedRoutesRef = collection(db, "routes");
@@ -67,6 +67,7 @@ function Map(props) {
       isMounted = false;
     };
   }, [props.coord]);
+
 
   const onMapClick = useCallback((event) => {
     try {
@@ -87,6 +88,17 @@ function Map(props) {
     mapRef.current = map;
   }, []);
 
+  // function to check if point is in saved
+  function checkSaved(){
+    for(let i =0; i < props.savedPlaces.length; i++){
+      if((props.savedPlaces[i].lat === selected.lat) &&
+      (props.savedPlaces[i].lng === selected.lng)){
+        return props.savedPlaces[i].id;
+      }
+    }
+    return false;
+  }
+
   const addPointToRoute = () => {
     props.setRouteState(false);
     props.setMarkers((current) => {
@@ -96,7 +108,7 @@ function Map(props) {
           key: `${selected.lat},${selected.lng}`,
           address:
             selected.isLandmark || selected.isSaved
-              ? `${selected.key}`
+              ? `${selected.address}`
               : `${props.address}`,
           lat: selected.lat,
           lng: selected.lng,
@@ -109,7 +121,7 @@ function Map(props) {
             key: `${selected.lat},${selected.lng}`,
             address:
               selected.isLandmark || selected.isSaved
-                ? `${selected.key}`
+                ? `${selected.address}`
                 : `${props.address}`,
             lat: selected.lat,
             lng: selected.lng,
@@ -138,28 +150,39 @@ function Map(props) {
   };
 
   ////// ADD REMOVE SAVED PLACES ////////
+  useEffect(() => {
+    if (props.panToSP) {
+      setSelected(props.panToSP);
+      // props.setDisplaySP(null);
+    }
+  }, [props.panToSP]);
+
   const addSavedPlace = async () => {
     await addDoc(savedPlacesRef, {
       name: SPModalValue,
       lat: selected.lat,
       lng: selected.lng,
       userId: props.userId,
+      display: false,
     });
     setSelected(null);
     setCheck(null);
     setSPModalValue("");
+    SPModalHandleClose();
     props.setSPisChanged((prev) => !prev);
   };
 
   const SPModalHandleClose = () => setShowSPModal(false);
 
   const removeSavedPlace = async () => {
-    const placeDoc = doc(db, "places", selected.id);
+    const placeId = checkSaved();
+    const placeDoc = doc(db, "places", placeId);
     await deleteDoc(placeDoc);
     setSelected(null);
     setCheck(null);
     props.setSPisChanged((prev) => !prev);
   };
+
 
 
    ////// ADD SAVED ROUTES ////////
@@ -226,14 +249,15 @@ function Map(props) {
         {props.histSiteCheck
           ? historicSites.map((landmark) => (
               <Marker
-                key={landmark.name}
+                key={`${landmark.lat},${landmark.lng}`}
                 position={{ lat: landmark.lat, lng: landmark.long }}
                 icon={{
                   url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
                 }}
                 onClick={() => {
                   setSelected({
-                    key: landmark.name,
+                    key: (landmark.lat + ", " + landmark.lng),
+                    address: landmark.name,
                     lat: landmark.lat,
                     lng: landmark.long,
                     isLandmark: true,
@@ -246,14 +270,15 @@ function Map(props) {
         {props.monumentCheck
           ? monuments.map((landmark) => (
               <Marker
-                key={landmark.name}
+                key={`${landmark.lat},${landmark.lng}`}
                 position={{ lat: landmark.lat, lng: landmark.long }}
                 icon={{
                   url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
                 }}
                 onClick={() => {
                   setSelected({
-                    key: landmark.name,
+                    key: (landmark.lat + ", " + landmark.lng),
+                    address: landmark.name,
                     lat: landmark.lat,
                     lng: landmark.long,
                     isLandmark: true,
@@ -263,18 +288,18 @@ function Map(props) {
             ))
           : null}
 
-        {props.displaySP
-          ? props.displaySP.map((place) =>
-              place != null ? (
+        { (props.displaySP.length > 0)
+          ? (props.displaySP.map((place) => (
                 <Marker
-                  key={place.name}
+                  key={`${place.lat},${place.lng}`}
                   position={{ lat: place.lat, lng: place.lng }}
                   icon={{
                     url: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
                   }}
                   onClick={() => {
                     setSelected({
-                      key: place.name,
+                      key: (place.lat).toString() + ", " + (place.lng).toString(),
+                      address: place.name,
                       lat: place.lat,
                       lng: place.lng,
                       isSaved: true,
@@ -282,9 +307,8 @@ function Map(props) {
                     });
                   }}
                 />
-              ) : null
-            )
-          : null}
+              ))) : null
+        }
 
         {check ? (
           <Marker
@@ -315,7 +339,7 @@ function Map(props) {
             <div>
               <div>
                 {selected.isLandmark || selected.isSaved ? (
-                  <h5>{selected.key}</h5>
+                  <h5>{selected.address}</h5>
                 ) : Geocode.fromLatLng(selected.lat, selected.lng).then(
                     (Response) => {
                       props.setAddress(
@@ -337,15 +361,15 @@ function Map(props) {
                 {parseFloat(selected.lat).toFixed(3)},{" "}
                 {parseFloat(selected.lng).toFixed(3)}
               </p>
-              {selected.isSaved ? (
+              {(checkSaved())? (
                 <Button onClick={removeSavedPlace}>
                   Remove from Saved Place
                 </Button>
-              ) : (
+              ) : (!selected.isLandmark) ? (
                 <Button onClick={() => setShowSPModal(true)}>
                   Add to Saved Place
                 </Button>
-              )}
+              ):null}
               {props.markers.includes(selected) ? (
                 <Button onClick={removePointFromRoute}>
                   Remove Point from Route

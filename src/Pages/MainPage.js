@@ -43,6 +43,7 @@ function MainPage() {
   const [savedPlaces, setSavedPlaces] = useState([]);
   const [SPisChanged, setSPisChanged] = useState(false);
   const [displaySP, setDisplaySP] = useState([]);
+  const [panToSP, setPanToSP] = useState(null);
 
   const [showSRModal, setShowSRModal] = useState(false)
   const [SRModalValue, setSRModalValue] = useState("");
@@ -64,6 +65,10 @@ function MainPage() {
       getSavedPlaces();
     }
   }, [userId, SPisChanged]);
+
+  useEffect(() => {
+    setDisplaySP(savedPlaces);
+  }, [savedPlaces]);
 
   useEffect(() => {
     if (userId !== "") {
@@ -124,7 +129,9 @@ function MainPage() {
     const placesData = places.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
+
     }));
+    console.log("FROM DB: ", placesData)
     setSavedPlaces(placesData);
   }
 
@@ -294,6 +301,8 @@ function MainPage() {
           savedRoutes={savedRoutes}
           setDisplaySR={setDisplaySR}
           displaySR={displaySR}
+          panToSP={panToSP}
+          setPanToSP={setPanToSP}
         />
       </div>
       <div className={classes.NavBar}>
@@ -331,6 +340,8 @@ function MainPage() {
           savedRoutes={savedRoutes}
           setDisplaySR={setDisplaySR}
           displaySR={displaySR}
+          panToSP={panToSP}
+          setPanToSP={setPanToSP}
         />
       </div>
     </div>
