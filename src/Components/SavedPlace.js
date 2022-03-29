@@ -89,6 +89,9 @@ function SavedPlace(props) {
       isSaved: true,
       id: place.id,
     }
+    if(props.displaySP.length < 2){
+      props.setDisplaySP([place])
+    }
     props.setPanToSP(sp);
   }
 

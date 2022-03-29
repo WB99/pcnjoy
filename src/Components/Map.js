@@ -90,11 +90,30 @@ function Map(props) {
 
   // function to check if point is in saved
   function checkSaved(){
-    for(let i =0; i < props.savedPlaces.length; i++){
-      if((props.savedPlaces[i].lat === selected.lat) &&
-      (props.savedPlaces[i].lng === selected.lng)){
-        return props.savedPlaces[i].id;
+    if (props.savedPlaces.length > 0) {
+      for(let i =0; i < props.savedPlaces.length; i++){
+        if((props.savedPlaces[i].lat === selected.lat) &&
+        (props.savedPlaces[i].lng === selected.lng)){
+          return props.savedPlaces[i].id;
+        }
       }
+    }
+    return false;
+  }
+
+  function checkLandmark(){
+    var check = 0;
+    for(let i =0; i < historicSites.length; i++){
+      if (((historicSites[i].lat === selected.lat) &&
+      (historicSites[i].long === selected.lng))){
+        return true;
+      }
+    }
+    for(let i =0; i < monuments.length; i++){
+      if ((monuments[i].lat === selected.lat) &&
+        (monuments[i].long === selected.lng)){
+          return true;
+        }
     }
     return false;
   }
@@ -153,7 +172,6 @@ function Map(props) {
   useEffect(() => {
     if (props.panToSP) {
       setSelected(props.panToSP);
-      // props.setDisplaySP(null);
     }
   }, [props.panToSP]);
 
@@ -163,7 +181,6 @@ function Map(props) {
       lat: selected.lat,
       lng: selected.lng,
       userId: props.userId,
-      display: false,
     });
     setSelected(null);
     setCheck(null);
@@ -240,6 +257,10 @@ function Map(props) {
           <Marker
             key={`${marker.lat},${marker.lng}`}
             position={{ lat: marker.lat, lng: marker.lng }}
+            icon={{
+              url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/346ab0e2-daa4-4eb3-ac49-2d6746afcd4c/bike-parking.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T163042Z&X-Amz-Expires=86400&X-Amz-Signature=0113e6ce59627ede77745c7bd72778c923ed37f0ba85c0c41ec2ce99198d607d&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22bike-parking.png%22&x-id=GetObject`,
+              scaledSize: new window.google.maps.Size(35,35)
+            }}
             onClick={() => {
               setSelected(marker);
             }}
@@ -252,7 +273,8 @@ function Map(props) {
                 key={`${landmark.lat},${landmark.lng}`}
                 position={{ lat: landmark.lat, lng: landmark.long }}
                 icon={{
-                  url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                  url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/700478af-2963-42dd-8397-5d6c77f16d95/fort_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T162128Z&X-Amz-Expires=86400&X-Amz-Signature=9ba443bcdeb371669bd38b77dc8201eab29aa894bc116c5b5b7b0caccfdb8e55&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22fort%2520%281%29.png%22&x-id=GetObject`,
+                  scaledSize: new window.google.maps.Size(35,35)
                 }}
                 onClick={() => {
                   setSelected({
@@ -273,7 +295,8 @@ function Map(props) {
                 key={`${landmark.lat},${landmark.lng}`}
                 position={{ lat: landmark.lat, lng: landmark.long }}
                 icon={{
-                  url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                  url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c752efba-b704-4509-9a68-f1e24160c462/bank_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T162306Z&X-Amz-Expires=86400&X-Amz-Signature=33e34b507ecf3f6a58ff9abf57da1c87d0f0c6dfbed7b34ebab8ca74ea6f6b72&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22bank%2520%281%29.png%22&x-id=GetObject`,
+                  scaledSize: new window.google.maps.Size(35,35)
                 }}
                 onClick={() => {
                   setSelected({
@@ -294,7 +317,8 @@ function Map(props) {
                   key={`${place.lat},${place.lng}`}
                   position={{ lat: place.lat, lng: place.lng }}
                   icon={{
-                    url: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
+                    url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/59828e78-3aba-4458-ad98-f6e03d2502ae/favorite_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T161733Z&X-Amz-Expires=86400&X-Amz-Signature=27232b1f60936dd6393a699d4a11d3954e640318861a86ceddd161976092a2cc&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22favorite%2520%281%29.png%22&x-id=GetObject`,
+                    scaledSize: new window.google.maps.Size(35,35)
                   }}
                   onClick={() => {
                     setSelected({
@@ -322,7 +346,8 @@ function Map(props) {
               setSelected(null);
             }}
             icon={{
-              url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+              url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a12e6662-8996-4582-a790-8dc902bfaf6f/location_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T163110Z&X-Amz-Expires=86400&X-Amz-Signature=fdb8640853e01bdcef5cb93dc6818c5d3dc47af3d1a9f683f80a65eeb57ecd4f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22location%2520%281%29.png%22&x-id=GetObject`,
+              scaledSize: new window.google.maps.Size(35,35)
             }}
           />
         ) : null}
@@ -338,7 +363,7 @@ function Map(props) {
           >
             <div>
               <div>
-                {selected.isLandmark || selected.isSaved ? (
+                {(checkLandmark() || checkSaved()) ? (
                   <h5>{selected.address}</h5>
                 ) : Geocode.fromLatLng(selected.lat, selected.lng).then(
                     (Response) => {
@@ -361,11 +386,12 @@ function Map(props) {
                 {parseFloat(selected.lat).toFixed(3)},{" "}
                 {parseFloat(selected.lng).toFixed(3)}
               </p>
+
               {(checkSaved())? (
                 <Button onClick={removeSavedPlace}>
                   Remove from Saved Place
                 </Button>
-              ) : (!selected.isLandmark) ? (
+              ) : (!checkLandmark()) ? (
                 <Button onClick={() => setShowSPModal(true)}>
                   Add to Saved Place
                 </Button>
