@@ -1,4 +1,5 @@
 .root {
+  position: relative;
   font-family: 'Montserrat';
   display: flex;
   flex-direction: column;
@@ -10,8 +11,8 @@
   background-color: white;
   width: 30%;
   height: 100%;
+  margin: 0 auto;
   box-shadow: 1px 0px 20px 1px black;
-  padding: 15px;
   overflow: hidden;
 }
 

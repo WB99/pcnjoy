@@ -42,23 +42,13 @@
 }
 
 .button {
-    padding: 0px;
-    margin: 0px;
+    text-decoration: none;
+    border: none;
+    width: 150px;
+    text-align: left;
 }
 
 .rounded {
     border-top: 2px solid #bbb;
     border-radius: 5px;
-  }
-
-
-/* .directions {
-    height: 100%;
-    overflow: scroll;
-    white-space: nowrap;
-} 
-
-.dir {
-    display: inline-block;
-    word-break: break-word;
-} */
+}

@@ -11,6 +11,7 @@ import usePlacesAutocomplete, {
 } from "use-places-autocomplete";
 import "@reach/combobox/styles.css";
 import Geocode from "react-geocode";
+import classes from "./SearchBar.module.css";
 
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API);
 Geocode.enableDebug();
@@ -29,10 +30,10 @@ function SearchBar(props) {
       componentRestrictions: { country: "sg" },
     },
   });
-  
+
   useEffect(() => {
-    setValue("")
-  }, [props.markers])
+    setValue("");
+  }, [props.markers]);
 
   return (
     <div>
@@ -76,13 +77,17 @@ function SearchBar(props) {
           onChange={(e) => {
             setValue(e.target.value);
           }}
-          disabled={!ready}
+          disabled={!ready || props.isRouted}
           placeholder={props.address ? props.address : "Enter an Address"}
         />
-        <ComboboxPopover>
+        <ComboboxPopover className={classes.searchBar}>
           {status === "OK" &&
             data.map(({ id, description }) => (
-              <ComboboxOption key={id} value={description} />
+              <ComboboxOption
+                className={classes.searchBar}
+                key={id}
+                value={description}
+              />
             ))}
         </ComboboxPopover>
       </Combobox>

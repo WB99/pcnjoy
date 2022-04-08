@@ -9,14 +9,14 @@ import {
 import Geocode from "react-geocode";
 import { Button, Modal, FloatingLabel, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { app, auth, db } from "../Firebase/firebase-config";
+import { db } from "../Firebase/firebase-config";
 import {
   collection,
   doc,
   getDoc,
   addDoc,
   deleteDoc,
-  GeoPoint
+  GeoPoint,
 } from "firebase/firestore";
 
 import historicSites from "../Assets/historic-sites.json";
@@ -56,7 +56,6 @@ function Map(props) {
   const savedPlacesRef = collection(db, "places");
   const savedRoutesRef = collection(db, "routes");
 
-
   useEffect(() => {
     let isMounted = true;
     if (mapRef.current && props.coord && isMounted) {
@@ -67,7 +66,6 @@ function Map(props) {
       isMounted = false;
     };
   }, [props.coord]);
-
 
   const onMapClick = useCallback((event) => {
     try {
@@ -89,11 +87,13 @@ function Map(props) {
   }, []);
 
   // function to check if point is in saved
-  function checkSaved(){
+  function checkSaved() {
     if (props.savedPlaces.length > 0) {
-      for(let i =0; i < props.savedPlaces.length; i++){
-        if((props.savedPlaces[i].lat === selected.lat) &&
-        (props.savedPlaces[i].lng === selected.lng)){
+      for (let i = 0; i < props.savedPlaces.length; i++) {
+        if (
+          props.savedPlaces[i].lat === selected.lat &&
+          props.savedPlaces[i].lng === selected.lng
+        ) {
           return props.savedPlaces[i].id;
         }
       }
@@ -101,19 +101,22 @@ function Map(props) {
     return false;
   }
 
-  function checkLandmark(){
-    var check = 0;
-    for(let i =0; i < historicSites.length; i++){
-      if (((historicSites[i].lat === selected.lat) &&
-      (historicSites[i].long === selected.lng))){
+  function checkLandmark() {
+    for (let i = 0; i < historicSites.length; i++) {
+      if (
+        historicSites[i].lat === selected.lat &&
+        historicSites[i].long === selected.lng
+      ) {
         return true;
       }
     }
-    for(let i =0; i < monuments.length; i++){
-      if ((monuments[i].lat === selected.lat) &&
-        (monuments[i].long === selected.lng)){
-          return true;
-        }
+    for (let i = 0; i < monuments.length; i++) {
+      if (
+        monuments[i].lat === selected.lat &&
+        monuments[i].long === selected.lng
+      ) {
+        return true;
+      }
     }
     return false;
   }
@@ -200,21 +203,19 @@ function Map(props) {
     props.setSPisChanged((prev) => !prev);
   };
 
+  ////// ADD SAVED ROUTES ////////
+  const SRModalHandleClose = () => props.setShowSRModal(false);
 
-
-   ////// ADD SAVED ROUTES ////////
-   const SRModalHandleClose = () => props.setShowSRModal(false);
-
-   const addSavedRoute = async () => {
+  const addSavedRoute = async () => {
     const routeGeoPoints = props.routeLatlngs.map(
       (point) => new GeoPoint(point.lat, point.lng)
     );
 
     // console.log("markers: ", props.markers);
-    const routeMarkers = props.markers.map((point) => (
-      new GeoPoint(point.lat, point.lng)
-    ))
-    const markerNames = props.markers.map((point) => (point.address))
+    const routeMarkers = props.markers.map(
+      (point) => new GeoPoint(point.lat, point.lng)
+    );
+    const markerNames = props.markers.map((point) => point.address);
     const docRef = await addDoc(savedRoutesRef, {
       name: props.SRModalValue,
       userId: props.userId,
@@ -226,16 +227,15 @@ function Map(props) {
       routeMarkers: routeMarkers,
       markerNames: markerNames,
     });
-    
+
     // get newly added route
     const newDoc = await getDoc(docRef);
-    const newRoute = {...newDoc.data(), id: docRef.id}
+    const newRoute = { ...newDoc.data(), id: docRef.id };
     console.log("NEW ROUTE: ", newRoute);
-    props.setSRisChanged((prev)=>(!prev));
+    props.setSRisChanged((prev) => !prev);
     props.setDisplaySR(newRoute);
-    SRModalHandleClose()
+    SRModalHandleClose();
   };
-
 
   if (!isLoaded) {
     return "Loading Maps";
@@ -259,7 +259,7 @@ function Map(props) {
             position={{ lat: marker.lat, lng: marker.lng }}
             icon={{
               url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/346ab0e2-daa4-4eb3-ac49-2d6746afcd4c/bike-parking.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T163042Z&X-Amz-Expires=86400&X-Amz-Signature=0113e6ce59627ede77745c7bd72778c923ed37f0ba85c0c41ec2ce99198d607d&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22bike-parking.png%22&x-id=GetObject`,
-              scaledSize: new window.google.maps.Size(35,35)
+              scaledSize: new window.google.maps.Size(35, 35),
             }}
             onClick={() => {
               setSelected(marker);
@@ -274,11 +274,11 @@ function Map(props) {
                 position={{ lat: landmark.lat, lng: landmark.long }}
                 icon={{
                   url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/700478af-2963-42dd-8397-5d6c77f16d95/fort_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T162128Z&X-Amz-Expires=86400&X-Amz-Signature=9ba443bcdeb371669bd38b77dc8201eab29aa894bc116c5b5b7b0caccfdb8e55&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22fort%2520%281%29.png%22&x-id=GetObject`,
-                  scaledSize: new window.google.maps.Size(35,35)
+                  scaledSize: new window.google.maps.Size(35, 35),
                 }}
                 onClick={() => {
                   setSelected({
-                    key: (landmark.lat + ", " + landmark.lng),
+                    key: landmark.lat + ", " + landmark.lng,
                     address: landmark.name,
                     lat: landmark.lat,
                     lng: landmark.long,
@@ -296,11 +296,11 @@ function Map(props) {
                 position={{ lat: landmark.lat, lng: landmark.long }}
                 icon={{
                   url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c752efba-b704-4509-9a68-f1e24160c462/bank_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T162306Z&X-Amz-Expires=86400&X-Amz-Signature=33e34b507ecf3f6a58ff9abf57da1c87d0f0c6dfbed7b34ebab8ca74ea6f6b72&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22bank%2520%281%29.png%22&x-id=GetObject`,
-                  scaledSize: new window.google.maps.Size(35,35)
+                  scaledSize: new window.google.maps.Size(35, 35),
                 }}
                 onClick={() => {
                   setSelected({
-                    key: (landmark.lat + ", " + landmark.lng),
+                    key: landmark.lat + ", " + landmark.lng,
                     address: landmark.name,
                     lat: landmark.lat,
                     lng: landmark.long,
@@ -311,28 +311,28 @@ function Map(props) {
             ))
           : null}
 
-        { (props.displaySP.length > 0)
-          ? (props.displaySP.map((place) => (
-                <Marker
-                  key={`${place.lat},${place.lng}`}
-                  position={{ lat: place.lat, lng: place.lng }}
-                  icon={{
-                    url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/59828e78-3aba-4458-ad98-f6e03d2502ae/favorite_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T161733Z&X-Amz-Expires=86400&X-Amz-Signature=27232b1f60936dd6393a699d4a11d3954e640318861a86ceddd161976092a2cc&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22favorite%2520%281%29.png%22&x-id=GetObject`,
-                    scaledSize: new window.google.maps.Size(35,35)
-                  }}
-                  onClick={() => {
-                    setSelected({
-                      key: (place.lat).toString() + ", " + (place.lng).toString(),
-                      address: place.name,
-                      lat: place.lat,
-                      lng: place.lng,
-                      isSaved: true,
-                      id: place.id,
-                    });
-                  }}
-                />
-              ))) : null
-        }
+        {props.displaySP.length > 0
+          ? props.displaySP.map((place) => (
+              <Marker
+                key={`${place.lat},${place.lng}`}
+                position={{ lat: place.lat, lng: place.lng }}
+                icon={{
+                  url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/59828e78-3aba-4458-ad98-f6e03d2502ae/favorite_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T161733Z&X-Amz-Expires=86400&X-Amz-Signature=27232b1f60936dd6393a699d4a11d3954e640318861a86ceddd161976092a2cc&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22favorite%2520%281%29.png%22&x-id=GetObject`,
+                  scaledSize: new window.google.maps.Size(35, 35),
+                }}
+                onClick={() => {
+                  setSelected({
+                    key: place.lat.toString() + ", " + place.lng.toString(),
+                    address: place.name,
+                    lat: place.lat,
+                    lng: place.lng,
+                    isSaved: true,
+                    id: place.id,
+                  });
+                }}
+              />
+            ))
+          : null}
 
         {check ? (
           <Marker
@@ -347,7 +347,7 @@ function Map(props) {
             }}
             icon={{
               url: `https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a12e6662-8996-4582-a790-8dc902bfaf6f/location_%281%29.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220329%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220329T163110Z&X-Amz-Expires=86400&X-Amz-Signature=fdb8640853e01bdcef5cb93dc6818c5d3dc47af3d1a9f683f80a65eeb57ecd4f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22location%2520%281%29.png%22&x-id=GetObject`,
-              scaledSize: new window.google.maps.Size(35,35)
+              scaledSize: new window.google.maps.Size(35, 35),
             }}
           />
         ) : null}
@@ -363,7 +363,7 @@ function Map(props) {
           >
             <div>
               <div>
-                {(checkLandmark() || checkSaved()) ? (
+                {checkLandmark() || checkSaved() ? (
                   <h5>{selected.address}</h5>
                 ) : Geocode.fromLatLng(selected.lat, selected.lng).then(
                     (Response) => {
@@ -387,15 +387,16 @@ function Map(props) {
                 {parseFloat(selected.lng).toFixed(3)}
               </p>
 
-              {(checkSaved())? (
+              {checkSaved() ? (
                 <Button onClick={removeSavedPlace}>
                   Remove from Saved Place
                 </Button>
-              ) : (!checkLandmark()) ? (
+              ) : !checkLandmark() ? (
                 <Button onClick={() => setShowSPModal(true)}>
                   Add to Saved Place
                 </Button>
-              ):null}
+              ) : null}
+
               {props.markers.includes(selected) ? (
                 <Button onClick={removePointFromRoute}>
                   Remove Point from Route
