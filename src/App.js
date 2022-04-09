@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useState } from "react";
+import React from "react";
 import {
   Routes,
   Route,
@@ -8,17 +8,8 @@ import {
 } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import MainPage from "./Pages/MainPage";
-import { auth } from "./Firebase/firebase-config";
 
 export default function App() {
-  const [isUserSignedIn, setIsUserSignedIn] = useState(true);
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      return setIsUserSignedIn(true);
-    } else {
-      setIsUserSignedIn(false);
-    }
-  });
 
   return (
     <Router>

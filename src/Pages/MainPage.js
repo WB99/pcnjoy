@@ -3,20 +3,10 @@ import Map from "../Components/Map";
 import NavBar from "../Components/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import classes from "./MainPage.module.css";
-import { app, auth, db } from "../Firebase/firebase-config";
-import {
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  GeoPoint 
-} from "firebase/firestore";
+import { auth, db } from "../Firebase/firebase-config";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { Navigate } from "react-router-dom";
 import "@fontsource/montserrat";
-
 
 function MainPage() {
   const [mapsLoaded, setMapsLoaded] = useState(null);
@@ -32,6 +22,7 @@ function MainPage() {
     directions: [],
   });
   const [userId, setUserId] = useState("");
+  const [isShowingAlert, setShowingAlert] = useState(false);
 
   const [routeReq, setRouteReq] = useState(false);
   const [isRouted, setRouteState] = useState(false);
@@ -45,7 +36,7 @@ function MainPage() {
   const [displaySP, setDisplaySP] = useState([]);
   const [panToSP, setPanToSP] = useState(null);
 
-  const [showSRModal, setShowSRModal] = useState(false)
+  const [showSRModal, setShowSRModal] = useState(false);
   const [SRModalValue, setSRModalValue] = useState("");
   const [savedRoutes, setSavedRoutes] = useState([]);
   const [SRisChanged, setSRisChanged] = useState(false);
@@ -54,12 +45,16 @@ function MainPage() {
   const savedPlacesRef = collection(db, "places");
   const savedRoutesRef = collection(db, "routes");
 
-  useEffect(() => {
-    getToken();
-    const user = auth.currentUser;
-    setUserId(user.uid);
-  }, []);
-  
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      getToken();
+      const user = auth.currentUser;
+      setUserId(user.uid);
+    } else {
+      return <Navigate to="/login" />;
+    }
+  });
+
   useEffect(() => {
     if (userId !== "") {
       getSavedPlaces();
@@ -76,52 +71,57 @@ function MainPage() {
     }
   }, [userId, SRisChanged]);
 
-  useEffect(()=>{
+  useEffect(() => {
     // for setmarkers
-    function buildMarkers(routeMarkers, markerNames){
-      var builtMarkers = []
-      for(let i=0; i<routeMarkers.length; i++){
+    function buildMarkers(routeMarkers, markerNames) {
+      var builtMarkers = [];
+      for (let i = 0; i < routeMarkers.length; i++) {
         var routeMarker = {
           address: markerNames[i],
-          key: routeMarkers[i]._lat.toString() + routeMarkers[i]._long.toString(),
+          key:
+            routeMarkers[i]._lat.toString() + routeMarkers[i]._long.toString(),
           lat: routeMarkers[i]._lat,
-          lng: routeMarkers[i]._long
-        }
+          lng: routeMarkers[i]._long,
+        };
         builtMarkers.push(routeMarker);
-      } 
-      return builtMarkers
+      }
+      return builtMarkers;
     }
 
     // // for setRouteLatLong
-    function buildRoute(routeGeoPoints){
-      const builtRoute = routeGeoPoints.map((point) => 
-        ({lat: point._lat, lng: point._long})
-      )
-      return builtRoute
+    function buildRoute(routeGeoPoints) {
+      const builtRoute = routeGeoPoints.map((point) => ({
+        lat: point._lat,
+        lng: point._long,
+      }));
+      return builtRoute;
     }
 
-    if(displaySR) {
+    if (displaySR) {
       // for setCleanRouteData
       const builtRouteData = {
         directions: displaySR.directions,
         distance: displaySR.distance,
         duration: displaySR.duration,
-        via: displaySR.via
-      }
-      setCleanRouteData(builtRouteData)
+        via: displaySR.via,
+      };
+      setCleanRouteData(builtRouteData);
 
       // setRouteLatLong
       const builtRoute = buildRoute(displaySR.routeGeoPoints);
       setrouteLatlngs(builtRoute);
-      
+
       // setMarkers
-      const builtMarkers = buildMarkers(displaySR.routeMarkers, displaySR.markerNames)
+      const builtMarkers = buildMarkers(
+        displaySR.routeMarkers,
+        displaySR.markerNames
+      );
       setMarkers(builtMarkers);
 
       // setRouteState
       setRouteState(true);
     }
-  }, [displaySR])
+  }, [displaySR]);
 
   async function getSavedPlaces() {
     const q = query(savedPlacesRef, where("userId", "==", userId));
@@ -129,9 +129,7 @@ function MainPage() {
     const placesData = places.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
-
     }));
-    console.log("FROM DB: ", placesData)
     setSavedPlaces(placesData);
   }
 
@@ -163,7 +161,6 @@ function MainPage() {
   useEffect(() => {
     if (!isRouted) {
       setrouteLatlngs([]);
-
     }
   }, [isRouted]);
 
@@ -268,6 +265,14 @@ function MainPage() {
 
   return (
     <div className={classes.root}>
+      <div
+        className={`alert alert-danger ${
+          isShowingAlert ? classes.alertShow : classes.alertHide
+        }`}
+        onTransitionEnd={() => setShowingAlert(false)}
+      >
+        Remember to wear your helmet when cycling on the road!
+      </div>
       <div className={classes.Map}>
         <Map
           setMapsLoaded={setMapsLoaded}
@@ -327,6 +332,7 @@ function MainPage() {
           savedPlaces={savedPlaces}
           setUserId={setUserId}
           userId={userId}
+          setShowingAlert={setShowingAlert}
           setSPisChanged={setSPisChanged}
           SPisChanged={SPisChanged}
           displaySP={displaySP}

@@ -30,8 +30,6 @@ import bikeroute from "../Assets/bikeroute.png";
 import saved from "../Assets/saved.png";
 import select from "../Assets/select.png";
 
-
-
 const libraries = ["places"];
 const mapContainerStyle = {
   width: "100vw",
@@ -218,8 +216,6 @@ function Map(props) {
     const routeGeoPoints = props.routeLatlngs.map(
       (point) => new GeoPoint(point.lat, point.lng)
     );
-
-    // console.log("markers: ", props.markers);
     const routeMarkers = props.markers.map(
       (point) => new GeoPoint(point.lat, point.lng)
     );
@@ -239,7 +235,6 @@ function Map(props) {
     // get newly added route
     const newDoc = await getDoc(docRef);
     const newRoute = { ...newDoc.data(), id: docRef.id };
-    console.log("NEW ROUTE: ", newRoute);
     props.setSRisChanged((prev) => !prev);
     props.setDisplaySR(newRoute);
     SRModalHandleClose();
@@ -267,7 +262,7 @@ function Map(props) {
             position={{ lat: marker.lat, lng: marker.lng }}
             icon={{
               url: bikeroute,
-              scaledSize: new window.google.maps.Size(35,35)
+              scaledSize: new window.google.maps.Size(35, 35),
             }}
             onClick={() => {
               setSelected(marker);
@@ -282,7 +277,7 @@ function Map(props) {
                 position={{ lat: landmark.lat, lng: landmark.long }}
                 icon={{
                   url: historic,
-                  scaledSize: new window.google.maps.Size(35,35)
+                  scaledSize: new window.google.maps.Size(35, 35),
                 }}
                 onClick={() => {
                   setSelected({
@@ -304,7 +299,7 @@ function Map(props) {
                 position={{ lat: landmark.lat, lng: landmark.long }}
                 icon={{
                   url: monument,
-                  scaledSize: new window.google.maps.Size(35,35)
+                  scaledSize: new window.google.maps.Size(35, 35),
                 }}
                 onClick={() => {
                   setSelected({
@@ -319,28 +314,28 @@ function Map(props) {
             ))
           : null}
 
-        { (props.displaySP.length > 0)
-          ? (props.displaySP.map((place) => (
-                <Marker
-                  key={`${place.lat},${place.lng}`}
-                  position={{ lat: place.lat, lng: place.lng }}
-                  icon={{
-                    url: saved,
-                    scaledSize: new window.google.maps.Size(35,35)
-                  }}
-                  onClick={() => {
-                    setSelected({
-                      key: (place.lat).toString() + ", " + (place.lng).toString(),
-                      address: place.name,
-                      lat: place.lat,
-                      lng: place.lng,
-                      isSaved: true,
-                      id: place.id,
-                    });
-                  }}
-                />
-              ))) : null
-        }
+        {props.displaySP.length > 0
+          ? props.displaySP.map((place) => (
+              <Marker
+                key={`${place.lat},${place.lng}`}
+                position={{ lat: place.lat, lng: place.lng }}
+                icon={{
+                  url: saved,
+                  scaledSize: new window.google.maps.Size(35, 35),
+                }}
+                onClick={() => {
+                  setSelected({
+                    key: place.lat.toString() + ", " + place.lng.toString(),
+                    address: place.name,
+                    lat: place.lat,
+                    lng: place.lng,
+                    isSaved: true,
+                    id: place.id,
+                  });
+                }}
+              />
+            ))
+          : null}
 
         {check ? (
           <Marker
@@ -355,7 +350,7 @@ function Map(props) {
             }}
             icon={{
               url: select,
-              scaledSize: new window.google.maps.Size(35,35)
+              scaledSize: new window.google.maps.Size(35, 35),
             }}
           />
         ) : null}

@@ -219,12 +219,11 @@ function NavBar(props) {
   }, [props.mapsLoaded]);
 
   function routeHandler(showRoute) {
-    // setSRAdded(false);
     if (showRoute) {
+      props.setShowingAlert(true);
       props.setRouteReq(true);
       props.setRouteState(true);
     } else {
-      // false
       if (props.displaySR) {
         props.setRouteState(false);
         props.setMarkers([]);
@@ -243,7 +242,6 @@ function NavBar(props) {
   }
 
   const removeSavedRoute = async () => {
-    console.log("ROUTE ID:  ", props.displaySR.id);
     const routeDoc = doc(db, "routes", props.displaySR.id);
     await deleteDoc(routeDoc);
     props.setDisplaySR(null);
@@ -316,6 +314,7 @@ function NavBar(props) {
           savedRoutes={props.savedRoutes}
           setDisplaySR={props.setDisplaySR}
           displaySR={props.displaySR}
+          setShowingAlert={props.setShowingAlert}
         />
       </div>
     );
