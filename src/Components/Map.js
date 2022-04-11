@@ -19,6 +19,7 @@ import {
   GeoPoint,
 } from "firebase/firestore";
 
+import classes from "./Map.module.css";
 import historicSites from "../Assets/historic-sites.json";
 import monuments from "../Assets/monuments.json";
 import "@fontsource/montserrat";
@@ -364,7 +365,7 @@ function Map(props) {
               props.setAddress(null);
             }}
           >
-            <div>
+            <div className={classes.infoWindow}>
               <div>
                 {checkLandmark() || checkSaved() ? (
                   <h5>{selected.address}</h5>
@@ -390,28 +391,29 @@ function Map(props) {
                 {parseFloat(selected.lng).toFixed(3)}
               </p>
 
-              {checkSaved() ? (
-                <Button onClick={removeSavedPlace}>
-                  Remove from Saved Place
-                </Button>
-              ) : !checkLandmark() ? (
-                <Button onClick={() => setShowSPModal(true)}>
-                  Add to Saved Place
-                </Button>
-              ) : null}
-
-              {props.markers.includes(selected) ? (
-                <Button onClick={removePointFromRoute}>
-                  Remove Point from Route
-                </Button>
-              ) : (
-                <Button
-                  onClick={addPointToRoute}
-                  disabled={props.markers.length >= markersLimit}
-                >
-                  Add Point to Route
-                </Button>
-              )}
+              <div className={classes.buttons}>
+                {checkSaved() ? (
+                  <Button onClick={removeSavedPlace}>
+                    Remove from Saved Place
+                  </Button>
+                ) : !checkLandmark() ? (
+                  <Button onClick={() => setShowSPModal(true)}>
+                    Add to Saved Place
+                  </Button>
+                ) : null}
+                {props.markers.includes(selected) ? (
+                  <Button onClick={removePointFromRoute}>
+                    Remove from Route
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={addPointToRoute}
+                    disabled={props.markers.length >= markersLimit}
+                  >
+                    Add to Route
+                  </Button>
+                )}
+              </div>
             </div>
           </InfoWindow>
         ) : null}

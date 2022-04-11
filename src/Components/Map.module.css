@@ -1,0 +1,9 @@
+.infoWindow {
+    word-wrap: break-word;
+    width: 400px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-around;
+}
