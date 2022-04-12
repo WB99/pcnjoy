@@ -45,16 +45,15 @@ function MainPage() {
   const savedPlacesRef = collection(db, "places");
   const savedRoutesRef = collection(db, "routes");
 
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      getToken();
-      const user = auth.currentUser;
-      setUserId(user.uid);
-    } else {
-      return <Navigate to="/login" />;
-    }
-  });
-
+  var server = (process.env.NODE_ENV === "development" ? process.env.REACT_APP_LOCAL : 
+  (process.env.NODE_ENV === "production" ? process.env.REACT_APP_HEROKU : null))
+  
+  useEffect(() => {
+    getToken();
+    const user = auth.currentUser;
+    setUserId(user.uid);
+  }, []);
+  
   useEffect(() => {
     if (userId !== "") {
       getSavedPlaces();
@@ -145,7 +144,8 @@ function MainPage() {
 
   async function getToken() {
     try {
-      const response = await fetch("http://127.0.0.1:9999/getToken", {
+      const url = `${server}/getToken`
+      const response = await fetch(url, {
         method: "POST",
         headers: { "content-type": "application/json" },
       });
@@ -177,7 +177,8 @@ function MainPage() {
 
     async function getRoute(start, end) {
       try {
-        const response = await fetch("http://127.0.0.1:9999/route", {
+        const url = `${server}/route`
+        const response = await fetch(url, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
