@@ -48,11 +48,15 @@ function MainPage() {
   var server = (process.env.NODE_ENV === "development" ? process.env.REACT_APP_LOCAL : 
   (process.env.NODE_ENV === "production" ? process.env.REACT_APP_HEROKU : null))
   
-  useEffect(() => {
-    getToken();
-    const user = auth.currentUser;
-    setUserId(user.uid);
-  }, []);
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      getToken();
+      const user = auth.currentUser;
+      setUserId(user.uid);
+    } else {
+      return <Navigate to="/login" />;
+    }
+  });
   
   useEffect(() => {
     if (userId !== "") {
@@ -272,7 +276,7 @@ function MainPage() {
         }`}
         onTransitionEnd={() => setShowingAlert(false)}
       >
-        Remember to wear your helmet when cycling on the road!
+        ⚠️  Always remember to wear a helmet when cycling!
       </div>
       <div className={classes.Map}>
         <Map

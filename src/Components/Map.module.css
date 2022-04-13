@@ -1,9 +1,13 @@
 .infoWindow {
     word-wrap: break-word;
-    width: 400px;
+    width: auto;
 }
 
 .buttons {
     display: flex;
-    justify-content: space-around;
+    align-items: left;
+}
+
+Button {
+    margin-right: 10px;
 }

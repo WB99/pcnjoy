@@ -5,6 +5,9 @@ import { auth, db } from "../Firebase/firebase-config";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBicycle } from "@fortawesome/free-solid-svg-icons";
+
 import { Navigate } from "react-router-dom";
 import classes from "./LoginPage.module.css";
 import "@fontsource/montserrat";
@@ -48,9 +51,14 @@ function LoginPage() {
       <div className={classes.root}>
         <div className={classes.loginformbackground}>
           <div className={classes.loginform}>
-            <h1 className={classes.title}>PCNjoy</h1>
-            <h2 className={classes.subtitle}>Welcome</h2>
-            <p className={classes.text}>Sign in to plan your next adventure!</p>
+          <div className={classes.title}>
+            <div className={classes.titleIcon}>
+              <FontAwesomeIcon icon={faBicycle} />
+            </div>
+            PCNjoy
+          </div>
+            <h2 className={classes.subtitle}>👋 Welcome!</h2>
+            <p className={classes.text}>Sign in to plan your next adventure:</p>
             <Button className={classes.button} onClick={handleSignIn}>
               Sign In with Google
             </Button>

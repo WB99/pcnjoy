@@ -295,7 +295,7 @@ function NavBar(props) {
     );
 
     body = (
-      <div>
+      <div className={classes.body}>
         <Landmarks
           setHistSite={props.setHistSite}
           setMonument={props.setMonument}
@@ -344,7 +344,6 @@ function NavBar(props) {
 
             <div className={classes.button}>
               {buttons}
-              <hr className={classes.rounded}></hr>
             </div>
           </div>
 
